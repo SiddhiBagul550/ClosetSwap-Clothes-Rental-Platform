@@ -2,9 +2,13 @@ const express = require("express");
 const userRoute = require("./routes/userRoute");
 const gobalErrorHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
+const authController = require("./controllers/authController");
 
 const app = express();
 app.use(express.json());
+// app.use((req, res, next) => {
+//   console.log(req.headers);
+// });
 
 app.use("/api/v1/users", userRoute);
 
