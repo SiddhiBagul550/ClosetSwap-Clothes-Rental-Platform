@@ -1,4 +1,5 @@
 // src/components/LoginPage.js
+import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,13 +8,29 @@ const LoginPage = ({ setIsLoggedIn }) => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     // Add your login logic here
     if (email && password) {
-      setIsLoggedIn(true);
-      alert("Login successful");
-      navigate("/login");
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/v1/users/login",
+          {
+            email,
+            password,
+          }
+        );
+
+        if (response.status === 200) {
+          alert("Login successful");
+          console.log(response);
+          navigate("/login");
+        } else {
+          alert("Login failed, please try again.");
+        }
+      } catch (error) {
+        alert("Error during login. Please try again.");
+      }
     } else {
       alert("Please fill out all fields");
     }

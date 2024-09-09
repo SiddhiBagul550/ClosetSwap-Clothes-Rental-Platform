@@ -3,9 +3,11 @@ const userRoute = require("./routes/userRoute");
 const gobalErrorHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 const authController = require("./controllers/authController");
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 // app.use((req, res, next) => {
 //   console.log(req.headers);
 // });

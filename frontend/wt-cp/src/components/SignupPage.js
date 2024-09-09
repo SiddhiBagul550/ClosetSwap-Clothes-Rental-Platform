@@ -1,19 +1,40 @@
 // src/components/SignupPage.js
+import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
-  const [name, setName] = useState("");
+  const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    // Add your signup logic here
-    if (name && email && password) {
-      alert("Signup successful");
-      navigate("/login");
+    if (username && email && password && passwordConfirm) {
+      try {
+        // Sending signup data to the backend
+        const response = await axios.post(
+          "http://localhost:3001/api/v1/users/signup",
+          {
+            username,
+            email,
+            password,
+            passwordConfirm,
+          }
+        );
+        if (response.status === 201) {
+          alert("Signup successful");
+          console.log(response);
+          navigate("/login");
+        } else {
+          alert("Signup failed, please try again.");
+        }
+      } catch (error) {
+        console.error("Error during signup:", error);
+        alert("Error during signup. Please try again.");
+      }
     } else {
       alert("Please fill out all fields");
     }
@@ -26,7 +47,7 @@ const SignupPage = () => {
         <input
           type="text"
           placeholder="Name"
-          value={name}
+          value={username}
           onChange={(e) => setName(e.target.value)}
           style={styles.input}
         />
@@ -42,6 +63,13 @@ const SignupPage = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={styles.input}
+        />{" "}
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
           style={styles.input}
         />
         <button type="submit" style={styles.button}>
