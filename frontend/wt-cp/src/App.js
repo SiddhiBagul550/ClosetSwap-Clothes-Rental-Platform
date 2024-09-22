@@ -59,11 +59,9 @@ import {
 import LoginPage from "./components/LoginPage";
 import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import Try from "./components/Try";
 
 function App() {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false); // State to check login status
-  // const [showSplash, setShowSplash] = useState(true); // State to control splash screen visibility
-
   return (
     <Router>
       <Routes>
@@ -88,6 +86,7 @@ function App() {
             )
           }
         />
+         
       </Routes>
     </Router>
   );

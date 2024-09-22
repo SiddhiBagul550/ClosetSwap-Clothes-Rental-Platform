@@ -8,7 +8,7 @@ export const isAuthenticated = () => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT
     const currentTime = Date.now() / 1000; // Current time in seconds
-    console.log(payload.exp, currentTime);
+    // console.log(payload.exp, currentTime);
     return payload.exp > currentTime; // Check if token is expired
   } catch (e) {
     return false;
