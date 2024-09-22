@@ -7,6 +7,6 @@ const productsController = require("./../controllers/productsController");
 router
   .route("/")
   .get(productsController.getAllProducts)
-  .post(productsController.createProduct);
+  .post(productsController.newproduct_entry);
 
 module.exports = router;
