@@ -48,7 +48,7 @@
 // export default App;
 
 // src/App.js
-// import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -59,7 +59,6 @@ import {
 import LoginPage from "./components/LoginPage";
 import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
-import Try from "./components/Try";
 
 function App() {
   return (
@@ -86,7 +85,6 @@ function App() {
             )
           }
         />
-         
       </Routes>
     </Router>
   );
