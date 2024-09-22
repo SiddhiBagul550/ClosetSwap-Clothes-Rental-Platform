@@ -15,18 +15,7 @@ exports.createProduct = catchAsync(async (req, res) => {
 });
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
-  const category = req.params.category;
-  const sub_category = req.params.sub_category;
-
-  // console.log(category);
-
-  const products = await Product.find({
-    category: category,
-    sub_category: sub_category,
-  });
-
-  // const products = await product.find();
-  // console.log(products);
+  const products = await Product.find();
 
   res.status(200).json({
     status: "success",
