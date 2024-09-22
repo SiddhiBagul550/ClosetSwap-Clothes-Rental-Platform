@@ -1,10 +1,10 @@
 const catchAsync = require("../utils/catchAsync");
-const product = require("./../models/productModel");
+const Product = require("./../models/productModel");
 const { promisify } = require("util");
 const user = require("./userController");
 
-exports.newproduct_entry = catchAsync(async (req, res) => {
-  const newproduct = await product.create(req.body);
+exports.createProduct = catchAsync(async (req, res) => {
+  const newproduct = await Product.create(req.body);
 
   res.status(201).json({
     status: "success, posted",
@@ -20,7 +20,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 
   // console.log(category);
 
-  const products = await product.find({
+  const products = await Product.find({
     category: category,
     sub_category: sub_category,
   });
