@@ -1,27 +1,32 @@
-// src/components/SplashScreen.js
-import React from "react";
+// 
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";  // Hook to navigate to another page
+import igm from './assets/ClosetSwap.jpg';
 
-const SplashScreen = () => {
+export default function SplashScreen() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Splash screen stays for 3 seconds, then navigates to the main page ("/home")
+    const timer = setTimeout(() => {
+      navigate('/home');  // Replace '/home' with your desired route
+    }, 3000);
+
+    // Cleanup the timer when the component unmounts
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.text}>ClosetSwap</h1>
+    <div style={{ backgroundColor: '#D8ACA1', height: '100vh', width: '100vw' }}>
+      <img
+        src={igm}
+        alt="Closet Swap"
+        style={{
+          height: '100vh',
+          width: '100vw',
+          objectFit: 'contain'
+        }}
+      />
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f5f5f5", // Light background color
-  },
-  text: {
-    fontSize: "48px",
-    fontWeight: "bold",
-    color: "#4CAF50", // Stylish green color
-  },
-};
-
-export default SplashScreen;
+}
