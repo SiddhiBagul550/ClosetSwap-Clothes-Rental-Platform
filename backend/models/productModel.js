@@ -138,6 +138,12 @@ const productSchema = new mongoose.Schema({
   cost_per_Day: {
     type: Number,
     required: [true, "Enter the cost"],
+    validate: {
+      validator: function (val) {
+        return val > 0;
+      },
+      message: "Value should be graetre than 0",
+    },
   },
 });
 

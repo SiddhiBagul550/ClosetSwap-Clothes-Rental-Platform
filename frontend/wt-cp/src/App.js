@@ -48,7 +48,7 @@
 // export default App;
 
 // src/App.js
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -57,15 +57,19 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "./components/LoginPage";
+import SignUp from "./components/SignupPage";
 import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import SignupPage from "./components/SignupPage";
+import Try from "./components/try";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-
+        <Route path="/try" element={<Try />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route
           path="/home"
           element={
