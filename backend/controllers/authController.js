@@ -63,7 +63,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
   //1. getting token and check of it's there
-  let token;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -103,16 +102,15 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.verfiyCheck = catchAsync((req, res) => {
-  console.log(req.cookies.jwt);
-  // const token = req.cookies.jwt;
+exports.verfiyCheck = catchAsync(async (req, res) => {
+  const token = req.cookies.jwt;
 
-  // if (!token) {
-  //   return res.status(401).json({
-  //     isAuth: false,
-  //   });
-  // }
+  if (!token) {
+    return res.status(401).json({
+      isAuth: false,
+    });
+  }
 
-  // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   return res.status(200).json({ isAuth: true });
 });

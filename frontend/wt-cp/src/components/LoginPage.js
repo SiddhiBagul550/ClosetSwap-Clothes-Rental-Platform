@@ -24,7 +24,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
         if (response.status === 200) {
           alert("Login successful");
           const jwtToken = response.data.token;
-          // localStorage.setItem("jwtToken", jwtToken);
+          localStorage.setItem("jwtToken", jwtToken);
           navigate("/home");
         } else {
           alert("Login failed, please try again.");

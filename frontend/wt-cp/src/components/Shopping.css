@@ -61,7 +61,7 @@
 
 .top-icon {
   font-size: 18px;
-  color: #4A4A4A;
+  color: #4a4a4a;
   text-decoration: none;
 }
 
@@ -92,7 +92,7 @@
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   padding: 10px;
   flex: 1;
@@ -140,7 +140,7 @@
 }
 
 .profile-details {
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 
 .username {
@@ -150,7 +150,7 @@
 
 .switch-account {
   background-color: #b3ffba; /* Pastel green */
-  color: #4A4A4A;
+  color: #4a4a4a;
   padding: 8px 12px;
   border-radius: 8px;
   border: none;
@@ -169,48 +169,52 @@
   }
 
   /* Profile Section Styling */
-.profile-section {
-  position: absolute;
-  top: 60px;
-  right: 10px;
-  width: 250px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  .profile-section {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    width: 250px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .username {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .profile-details p {
+    margin: 0;
+    padding: 5px 0;
+    font-size: 16px;
+  }
+
+  .switch-account {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f2d1ff; /* Soft purple */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .switch-account:hover {
+    background-color: #d19ce6;
+  }
 }
 
-.profile-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.username {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.profile-details p {
-  margin: 0;
-  padding: 5px 0;
-  font-size: 16px;
-}
-
-.switch-account {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f2d1ff; /* Soft purple */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.switch-account:hover {
-  background-color: #d19ce6;
-}
-
+.product-link {
+  text-decoration: none;
+  color: black;
 }
