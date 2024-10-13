@@ -8,7 +8,7 @@ export default function HomePage() {
   useEffect(() => {
     // Redirect after 3 seconds
     const timer = setTimeout(() => {
-      navigate("/category"); // Navigate to the category page
+      navigate("/shopping"); // Navigate to the category page
     }, 3000); // 3000ms = 3 seconds
 
     // Cleanup the timer

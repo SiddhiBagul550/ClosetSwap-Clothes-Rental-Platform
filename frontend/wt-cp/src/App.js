@@ -68,6 +68,8 @@ import Cart from "./components/Cart";
 import MenShopping from "./components/MenShopping";
 import WomenShopping from "./components/WomenShopping";
 import KidsShopping from "./components/KidsShopping";
+import Liked from "./components/Liked";
+
 
 function App() {
   return (
@@ -83,6 +85,7 @@ function App() {
         <Route path="/men" element={<MenShopping />} />
         <Route path="/women" element={<WomenShopping />} />
         <Route path="/kids" element={<KidsShopping />} />
+        <Route path="/liked-items" element={<Liked />} />
 
         <Route
           path="/home"
@@ -106,7 +109,7 @@ function App() {
           path="/"
           element={
             localStorage.getItem("jwtToken") ? (
-              <Navigate to="/home" />
+              <Navigate to="/login" />
             ) : (
               <Navigate to="/login" />
             )
