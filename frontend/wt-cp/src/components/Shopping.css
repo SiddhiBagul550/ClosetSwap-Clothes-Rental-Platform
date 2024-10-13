@@ -100,6 +100,7 @@
 
 .product-card {
   background-color: white;
+  height: 100%;
   border-radius: 10px;
   padding: 10px;
   display: flex;
@@ -110,10 +111,18 @@
 }
 
 .image-placeholder {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   background-color: #f2d1ff;
   border-radius: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.image-placeholder img {
+  max-width: 100%; /* Ensures the image does not exceed the width of the placeholder */
+  max-height: 100%; /* Ensures the image does not exceed the height of the placeholder */
+  object-fit: cover; /* Covers the placeholder while maintaining aspect ratio */
 }
 
 .product-actions {
@@ -217,4 +226,10 @@
 .product-link {
   text-decoration: none;
   color: black;
+}
+
+.row {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
 }

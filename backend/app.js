@@ -7,7 +7,7 @@ const productRoutes = require("./routes/productRoutes");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
     origin: "http://localhost:3000", // Your frontend origin

@@ -1,35 +1,94 @@
-import React, { useState } from 'react';
-import './Rent.css';
+import React, { useState } from "react";
+import "./Rent.css";
+import axios from "axios";
+
+function convert(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+  });
+}
 
 const FormPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    image: null,
-    category: '',
-    sub_category: '',
-    material: '',
-    type: '',
-    available_quantity: '',
-    fit_type: '',
-    collar_styles: '',
-    size: '',
-    sleeve_style: '',
-    brand: '',
-    cost_per_day: ''
+    name: "",
+    category: "",
+    sub_category: "",
+    material: "",
+    type: "",
+    available_quantity: 0,
+    fit_type: "",
+    collar_styles: "",
+    size: "",
+    sleeve_style: "NA",
+    brand: "",
+    cost_per_day: 0,
   });
+  const [img, setImg] = useState("");
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convert(file);
+    setImg(base64);
+  };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value
+      [name]: value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const validateData = () => {
+    if (formData.cost_per_day <= 0 || formData.available_quantity <= 0) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(formData);
+
+    if (!validateData()) {
+      alert("invalidat data ");
+      return;
+    }
+    // let data = {};
+    // data.name = formData.name;
+    // data.img = img;
+    // data.category = formData.category;
+    // data.sub_category = formData.sub_category;
+    // data.material = formData.material;
+    // data.type = formData.type;
+    // data.available_quantity = formData.available_quantity;
+    // data.fit_type = formData.fit_type;
+    // data.collar_styles = formData.collar_styles;
+    // data.size = formData.size;
+    // data.sleeve_style = formData.sleeve_style;
+    // data.brand = formData.brand;
+    // data.cost_per_day = formData.cost_per_dayl;
+    // data.owner = localStorage.userId;
+    console.log({ ...formData, img: img, owner: localStorage.userId });
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:3001/api/v1/products/",
+        { ...formData, img: img, owner: localStorage.userId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.jwtToken}`,
+          },
+        }
+      );
+      alert("Done");
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   return (
@@ -52,7 +111,7 @@ const FormPage = () => {
           type="file"
           name="image"
           accept="image/jpeg, image/png"
-          onChange={handleChange}
+          onChange={handleFileUpload}
           required
         />
 
@@ -65,9 +124,9 @@ const FormPage = () => {
           required
         >
           <option value="">Select Category</option>
-          <option value="Men">Men</option>
-          <option value="Women">Women</option>
-          <option value="Kids">Kids</option>
+          <option value="men">Men</option>
+          <option value="women">Women</option>
+          <option value="kids">Kids</option>
         </select>
 
         {/* Sub-category */}
@@ -146,7 +205,8 @@ const FormPage = () => {
         />
 
         {/* Sleeve Style */}
-        {formData.sub_category === 'Clothing' || formData.sub_category === 'Costumes' ? (
+        {formData.sub_category === "Clothing" ||
+        formData.sub_category === "Costumes" ? (
           <>
             <label>Sleeve Style</label>
             <input

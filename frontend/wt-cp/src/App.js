@@ -1,52 +1,3 @@
-// // src/App.js
-// import React, { useState, useEffect } from "react";
-// import {
-//   BrowserRouter as Router,
-//   Route,
-//   Routes,
-//   Navigate,
-// } from "react-router-dom";
-// import SplashScreen from "./components/SplashScreen";
-// import LoginPage from "./components/LoginPage";
-// import SignupPage from "./components/SignupPage";
-
-// function App() {
-//   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to check login status
-//   const [showSplash, setShowSplash] = useState(true); // State to control splash screen visibility
-
-//   // Display splash screen for 5 seconds
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       setShowSplash(false);
-//     }, 5000);
-//     return () => clearTimeout(timer);
-//   }, []);
-
-//   return (
-//     <Router>
-//       <Routes>
-//         {showSplash ? (
-//           <Route path="/" element={<SplashScreen />} />
-//         ) : (
-//           <>
-//             <Route
-//               path="/login"
-//               element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
-//             />
-//             <Route path="/signup" element={<SignupPage />} />
-//             <Route
-//               path="/"
-//               element={<Navigate to={isLoggedIn ? "/login" : "/signup"} />}
-//             />
-//           </>
-//         )}
-//       </Routes>
-//     </Router>
-//   );
-// }
-
-// export default App;
-
 // src/App.js
 import React from "react";
 import CategoryPage from "./components/CategoryPage";
@@ -77,16 +28,79 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/splash" element={<SplashScreen />} />
-        <Route path="/category" element={<CategoryPage />} />
-        <Route path="/shopping" element={<Shopping />} />
-        <Route path="/product" element={<ProductCard />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/men" element={<MenShopping />} />
-        <Route path="/women" element={<WomenShopping />} />
-        <Route path="/kids" element={<KidsShopping />} />
-        <Route path="/liked-items" element={<Liked />} />
-        <Route path="/rent" element={<Rent />} />
+
+        <Route
+          path="/category"
+          element={
+            <ProtectedRoute>
+              <CategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shopping"
+          element={
+            <ProtectedRoute>
+              <Shopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/product/:id"
+          element={
+            <ProtectedRoute>
+              <ProductCard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/men"
+          element={
+            <ProtectedRoute>
+              <MenShopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/women"
+          element={
+            <ProtectedRoute>
+              <WomenShopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/kids"
+          element={
+            <ProtectedRoute>
+              <KidsShopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/liked-items"
+          element={
+            <ProtectedRoute>
+              <Liked />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rent"
+          element={
+            <ProtectedRoute>
+              <Rent />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/home"

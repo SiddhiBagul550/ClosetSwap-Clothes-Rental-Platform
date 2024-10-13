@@ -4,14 +4,18 @@ const { promisify } = require("util");
 const user = require("./userController");
 
 exports.createProduct = catchAsync(async (req, res) => {
-  const newproduct = await Product.create(req.body);
+  try {
+    const newproduct = await Product.create(req.body);
 
-  res.status(201).json({
-    status: "success, posted",
-    data: {
-      product: newproduct,
-    },
-  });
+    res.status(201).json({
+      status: "success, posted",
+      data: {
+        product: newproduct,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
@@ -28,6 +32,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 
 exports.getProductsById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
+
   const product = await Product.findById(id);
   res.status(200).json({
     status: "success",

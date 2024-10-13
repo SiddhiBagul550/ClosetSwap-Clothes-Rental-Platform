@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
 import "./Shopping.css";
 import logo from "./assets/ClosetSwap.jpg";
+import axios from "axios";
+import UserInfo from "./UserInfo";
 
 function App() {
   const [showProfile, setShowProfile] = useState(false);
@@ -155,12 +157,19 @@ function App() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((product, index) => (
-            <Link to={`/product/${index}`} key={index} className="product-link">
+            <Link
+              to={`/product/${product._id}`}
+              key={index}
+              className="product-link"
+            >
               <div className="product-card">
                 <div className="image-placeholder">
                   <img src={product.img} alt={product.img} />
                 </div>
-                <div>{product.name}</div>
+                <div className="row">
+                  <div>{product.name} </div>
+                  <div> ₹ {product.cost_per_day} </div>
+                </div>
                 <div className="product-actions">
                   <span>💖</span>
                   <span>🔗</span>
@@ -173,28 +182,7 @@ function App() {
       </div>
 
       {/* Profile section */}
-      {showProfile && (
-        <div className="profile-section">
-          <div className="profile-details">
-            <p className="username">John Doe</p>
-            <br></br>
-            <p>Email: johndoe@example.com</p>
-            <br></br>
-            <p>Member since: Jan 2021</p>
-            <br></br>
-            <p>Total Orders: 25</p>
-            <br></br>
-            <p>Items Added to Rent: 5</p>
-            <br></br>
-            <button
-              className="switch-account"
-              onClick={() => navigate("/login")}
-            >
-              Switch Account
-            </button>
-          </div>
-        </div>
-      )}
+      {showProfile && <UserInfo />}
     </div>
   );
 }

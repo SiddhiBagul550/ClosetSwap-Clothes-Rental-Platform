@@ -58,7 +58,6 @@ const materialsByCategory = {
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    unique: true,
     required: [true, "enter a valid name !"],
   },
 
@@ -75,30 +74,30 @@ const productSchema = new mongoose.Schema({
 
   sub_category: {
     type: String, // Ensure `type` is defined for category
-    enum: ["clothing", "Accessories", "Footwear", "Costumes"], // Enum for categories
+    enum: ["Clothing", "Accessories", "Footwear", "Costumes"], // Enum for categories
     required: [true, "Please select a category"],
   },
   material: {
     type: String, // Ensure `type` is defined for material
     required: [true, "Please enter material"],
-    validate: {
-      validator: function (value) {
-        // Access the selected category
-        const selectedCategory = this.sub_category;
-        // Check if the material is valid for the selected category
-        if (
-          materialsByCategory[selectedCategory] &&
-          materialsByCategory[selectedCategory].includes(value)
-        ) {
-          return true;
-        }
-        return false;
-      },
-      message: function (props) {
-        // Error message when material is invalid for the selected category
-        return `${props.value} is not a valid material for the selected category: ${this.sub_category}`;
-      },
-    },
+    // validate: {
+    //   validator: function (value) {
+    //     // Access the selected category
+    //     const selectedCategory = this.sub_category;
+    //     // Check if the material is valid for the selected category
+    //     if (
+    //       materialsByCategory[selectedCategory] &&
+    //       materialsByCategory[selectedCategory].includes(value)
+    //     ) {
+    //       return true;
+    //     }
+    //     return false;
+    //   },
+    //   message: function (props) {
+    //     // Error message when material is invalid for the selected category
+    //     return `${props.value} is not a valid material for the selected category: ${this.sub_category}`;
+    //   },
+    // },
     default: "other", // Default value if no material is provided
   },
   type: {
@@ -131,20 +130,20 @@ const productSchema = new mongoose.Schema({
     required: [true, "select a sleeve style"],
   },
 
-  Brand: {
+  brand: {
     type: String,
     required: [true, "select a brand name"],
   },
 
-  cost_per_Day: {
-    type: Number,
+  cost_per_day: {
+    type: String,
     required: [true, "Enter the cost"],
-    validate: {
-      validator: function (val) {
-        return val > 0;
-      },
-      message: "Value should be graetre than 0",
-    },
+    // validate: {
+    //   validator: function (val) {
+    //     return val > 0;
+    //   },
+    //   message: "Value should be graetre than 0",
+    // },
   },
 
   owner: {

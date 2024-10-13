@@ -25,6 +25,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
           alert("Login successful");
           const jwtToken = response.data.token;
           localStorage.setItem("jwtToken", jwtToken);
+          localStorage.setItem("userId", response.data.data.user._id);
           navigate("/home");
         } else {
           alert("Login failed, please try again.");
