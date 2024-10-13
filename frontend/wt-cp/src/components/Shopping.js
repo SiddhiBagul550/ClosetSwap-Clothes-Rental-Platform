@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
 import './Shopping.css';
-import logo from './assets/ClosetSwap.jpg';
+import logo from './assets/ClosetShort.png';
 
 function App() {
   const [showProfile, setShowProfile] = useState(false);
@@ -41,7 +41,7 @@ function App() {
         src={logo} 
         alt="Closet Swap" 
         style={{ 
-          height: '10vh', 
+          height: '7vh', 
           width: '10vw',
           objectFit: 'contain'
         }} 
@@ -52,7 +52,7 @@ function App() {
         </div>
 
         <div className="top-bar-icons">
-          <Link to="/upload" className="rent-button">➕ Rent</Link>
+          <Link to="/rent" className="rent-button">➕ Rent</Link>
           <Link to="/liked-items" className="top-icon">💖 Liked Items</Link>
           <Link to="/cart" className="top-icon">🛒 Cart</Link>
           <div className="profile-icon" onClick={toggleProfile}>👤 Profile</div>

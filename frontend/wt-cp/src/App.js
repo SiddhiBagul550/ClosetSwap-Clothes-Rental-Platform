@@ -69,6 +69,7 @@ import MenShopping from "./components/MenShopping";
 import WomenShopping from "./components/WomenShopping";
 import KidsShopping from "./components/KidsShopping";
 import Liked from "./components/Liked";
+import Rent from "./components/Rent";
 
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
         <Route path="/women" element={<WomenShopping />} />
         <Route path="/kids" element={<KidsShopping />} />
         <Route path="/liked-items" element={<Liked />} />
+        <Route path="/rent" element={<Rent />} />
 
         <Route
           path="/home"
