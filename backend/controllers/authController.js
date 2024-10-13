@@ -36,6 +36,8 @@ exports.signup = catchAsync(async (req, res) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    contactNumber: req.body.contactNumber,
+    address: req.body.address,
   });
 
   createSendToken(newUser, 201, res);
@@ -102,14 +104,15 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 exports.verfiyCheck = catchAsync((req, res) => {
-  const token = req.cookie.jwt;
+  console.log(req.cookies.jwt);
+  // const token = req.cookies.jwt;
 
-  if (!token) {
-    return res.status(401).json({
-      isAuth: false,
-    });
-  }
+  // if (!token) {
+  //   return res.status(401).json({
+  //     isAuth: false,
+  //   });
+  // }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // const decoded = jwt.verify(token, process.env.JWT_SECRET);
   return res.status(200).json({ isAuth: true });
 });

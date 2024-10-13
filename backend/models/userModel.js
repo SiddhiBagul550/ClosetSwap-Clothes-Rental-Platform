@@ -34,6 +34,17 @@ const userSchema = mongoose.Schema({
     },
   },
 
+  contactNumber: {
+    type: String,
+    required: [true, "Please enter contact number"],
+    minlength: 10,
+  },
+
+  address: {
+    type: String,
+    require: [true, "Please enter your address"],
+  },
+
   passwordChangedAt: Date,
 });
 

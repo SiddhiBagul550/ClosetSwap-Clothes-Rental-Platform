@@ -48,7 +48,7 @@
 // export default App;
 
 // src/App.js
-import React, { useState, useEffect } from "react";
+import React from "react";
 import CategoryPage from "./components/CategoryPage";
 import {
   BrowserRouter as Router,
@@ -58,7 +58,6 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "./components/LoginPage";
-import SignUp from "./components/SignupPage";
 import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import SignupPage from "./components/SignupPage";
@@ -76,14 +75,64 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+
         <Route path="/splash" element={<SplashScreen />} />
-        <Route path="/category" element={<CategoryPage />} />
-        <Route path="/shopping" element={<Shopping />} />
-        <Route path="/product" element={<ProductCard />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/men" element={<MenShopping />} />
-        <Route path="/women" element={<WomenShopping />} />
-        <Route path="/kids" element={<KidsShopping />} />
+        <Route
+          path="/category"
+          element={
+            <ProtectedRoute>
+              <CategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shopping"
+          element={
+            <ProtectedRoute>
+              <Shopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/product"
+          element={
+            <ProtectedRoute>
+              <ProductCard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/men"
+          element={
+            <ProtectedRoute>
+              <MenShopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/women"
+          element={
+            <ProtectedRoute>
+              <WomenShopping />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/kids"
+          element={
+            <ProtectedRoute>
+              <KidsShopping />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/home"

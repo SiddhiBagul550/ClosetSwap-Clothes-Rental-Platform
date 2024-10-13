@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const User = require("./userModel");
 
 const materialsByCategory = {
   clothing: [
@@ -143,6 +144,22 @@ const productSchema = new mongoose.Schema({
         return val > 0;
       },
       message: "Value should be graetre than 0",
+    },
+  },
+
+  owner: {
+    type: String,
+    required: [true, "Need owner id"],
+    validate: {
+      validator: async function (val) {
+        const user = await User.findById(val);
+
+        if (!user) {
+          return false;
+        }
+        return true;
+      },
+      message: "Invalid user",
     },
   },
 });
