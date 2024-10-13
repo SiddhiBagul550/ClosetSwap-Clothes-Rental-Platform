@@ -69,6 +69,7 @@ import MenShopping from "./components/MenShopping";
 import WomenShopping from "./components/WomenShopping";
 import KidsShopping from "./components/KidsShopping";
 import Liked from "./components/Liked";
+import Rent from "./components/Rent";
 
 function App() {
   return (
@@ -76,79 +77,16 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-
-        <Route
-          path="/splash"
-          element={
-            <ProtectedRoute>
-              <SplashScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/category"
-          element={
-            <ProtectedRoute>
-              <CategoryPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/shopping"
-          element={
-            <ProtectedRoute>
-              <Shopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/product"
-          element={
-            <ProtectedRoute>
-              <ProductCard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/men"
-          element={
-            <ProtectedRoute>
-              <MenShopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/women"
-          element={
-            <ProtectedRoute>
-              <WomenShopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/kids"
-          element={
-            <ProtectedRoute>
-              <KidsShopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/liked-items"
-          element={
-            <ProtectedRoute>
-              <Liked />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/splash" element={<SplashScreen />} />
+        <Route path="/category" element={<CategoryPage />} />
+        <Route path="/shopping" element={<Shopping />} />
+        <Route path="/product" element={<ProductCard />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/men" element={<MenShopping />} />
+        <Route path="/women" element={<WomenShopping />} />
+        <Route path="/kids" element={<KidsShopping />} />
+        <Route path="/liked-items" element={<Liked />} />
+        <Route path="/rent" element={<Rent />} />
 
         <Route
           path="/home"
