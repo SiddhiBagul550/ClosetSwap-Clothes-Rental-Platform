@@ -124,7 +124,7 @@ function App() {
           path="/"
           element={
             localStorage.getItem("jwtToken") ? (
-              <Navigate to="/login" />
+              <Navigate to="/home" />
             ) : (
               <Navigate to="/login" />
             )

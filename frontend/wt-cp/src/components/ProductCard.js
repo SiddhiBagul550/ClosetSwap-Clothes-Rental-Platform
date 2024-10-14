@@ -152,7 +152,13 @@ const styles = {
     borderRadius: "50%",
     marginRight: "10px",
   },
-  img: {},
+  img: {
+    maxWidthidth:
+      "100%" /* Ensures the image does not exceed the width of the placeholder */,
+    maxHeight:
+      "100%" /* Ensures the image does not exceed the height of the placeholder */,
+    objectFit: "cover",
+  },
 };
 
 export default ProductCard;

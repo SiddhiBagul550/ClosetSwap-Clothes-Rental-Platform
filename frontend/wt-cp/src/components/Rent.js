@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Rent.css";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function convert(file) {
@@ -16,6 +17,60 @@ function convert(file) {
 }
 
 const FormPage = () => {
+  const navigate = useNavigate();
+  const materialsByCategory = {
+    Clothing: [
+      "Cotton",
+      "Wool",
+      "Silk",
+      "Linen",
+      "Polyester",
+      "Rayon",
+      "Rayon",
+      "Nylon",
+      "Spandex",
+      "Denim",
+      "Velvet",
+      "Leather",
+    ],
+    Accessories: [
+      "Leather",
+      "Metal",
+      "Plastic",
+      "Acrylic",
+      "Glass",
+      "Wood",
+      "Rubber",
+      "Silicone",
+      "Beads",
+      "Pearls",
+      "Feathers",
+    ],
+    Footwear: [
+      "Leather",
+      "Suede",
+      "Canvas",
+      "Rubber",
+      "Synthetic Leather",
+      "Mesh",
+      "Foam",
+      "PVC",
+      "Neoprene",
+      "Textile",
+    ],
+    Costumes: [
+      "Polyester",
+      "Spandex",
+      "Nylon",
+      "Tulle",
+      "Sequins",
+      "Feathers",
+      "Faux Fur",
+      "Satin",
+      "Velvet",
+      "Lycra",
+    ],
+  };
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -59,21 +114,6 @@ const FormPage = () => {
       alert("invalidat data ");
       return;
     }
-    // let data = {};
-    // data.name = formData.name;
-    // data.img = img;
-    // data.category = formData.category;
-    // data.sub_category = formData.sub_category;
-    // data.material = formData.material;
-    // data.type = formData.type;
-    // data.available_quantity = formData.available_quantity;
-    // data.fit_type = formData.fit_type;
-    // data.collar_styles = formData.collar_styles;
-    // data.size = formData.size;
-    // data.sleeve_style = formData.sleeve_style;
-    // data.brand = formData.brand;
-    // data.cost_per_day = formData.cost_per_dayl;
-    // data.owner = localStorage.userId;
     console.log({ ...formData, img: img, owner: localStorage.userId });
     try {
       const response = await axios.post(
@@ -86,6 +126,7 @@ const FormPage = () => {
         }
       );
       alert("Done");
+      navigate("/shopping");
     } catch (error) {
       console.log(error.message);
     }
@@ -146,13 +187,20 @@ const FormPage = () => {
 
         {/* Material */}
         <label>Material</label>
-        <input
-          type="text"
+        <select
           name="material"
           value={formData.material}
           onChange={handleChange}
           required
-        />
+          disabled={!formData.sub_category}
+        >
+          {formData.sub_category &&
+            materialsByCategory[formData.sub_category].map((material) => (
+              <option key={material} value={material}>
+                {material}
+              </option>
+            ))}
+        </select>
 
         {/* Type */}
         <label>Type</label>
