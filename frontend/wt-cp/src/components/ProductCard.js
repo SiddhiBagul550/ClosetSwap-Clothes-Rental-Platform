@@ -54,7 +54,7 @@ const ProductCard = () => {
 
       {/* Description */}
       <div style={styles.descriptionBox}>
-        <p>Product description for Product {productId}</p>{" "}
+        <p>{productInfo.product_description}</p>{" "}
         {/* Dynamic product description */}
       </div>
 

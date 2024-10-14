@@ -6,7 +6,7 @@
 
 .app-container {
   font-family: Arial, sans-serif;
-  background-color: #e1ffe1; /* Pastel green background */
+  background-color: #D7D9D7; /* Light Gray */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #f8e1ff; /* Pastel purple */
+  background-color: #D8ACA1; /* Nav Bar Color */
 }
 
 .search-bar {
@@ -50,7 +50,7 @@
 }
 
 .rent-button {
-  background-color: #b3ffba; /* Pastel green */
+  background-color: #B48EAE; /* Muted Pink */
   color: black;
   padding: 10px;
   border-radius: 10px;
@@ -76,7 +76,7 @@
 }
 
 .filter-section {
-  background-color: #f2d1ff; /* Light purple for filters */
+  background-color: #C9C5CB; /* Soft Gray for filters */
   padding: 10px;
   width: 250px; /* Set width for vertical column */
 }
@@ -113,7 +113,7 @@
 .image-placeholder {
   width: 150px;
   height: 150px;
-  background-color: #f2d1ff;
+  background-color: #BAACBD; /* Pastel Purple */
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -138,7 +138,7 @@
 }
 
 .profile-section {
-  background-color: #ffe6f7; /* Pastel pink */
+  background-color: #BAACBD; /* Profile Bar Color */
   border-radius: 10px;
   padding: 15px;
   position: absolute;
@@ -158,7 +158,7 @@
 }
 
 .switch-account {
-  background-color: #b3ffba; /* Pastel green */
+  background-color: #B48EAE; /* Muted Pink */
   color: #4a4a4a;
   padding: 8px 12px;
   border-radius: 8px;
@@ -183,8 +183,7 @@
     top: 60px;
     right: 10px;
     width: 250px;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #BAACBD; /* Profile Bar Color */
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -210,7 +209,7 @@
   .switch-account {
     margin-top: 20px;
     padding: 10px;
-    background-color: #f2d1ff; /* Soft purple */
+    background-color: #B48EAE; /* Muted Pink */
     color: white;
     border: none;
     border-radius: 5px;
@@ -219,7 +218,7 @@
   }
 
   .switch-account:hover {
-    background-color: #d19ce6;
+    background-color: #BAACBD; /* Pastel Purple */
   }
 }
 

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
 import "./Shopping.css";
-import logo from "./assets/ClosetSwap.jpg";
+import logo from "./assets/ClosetShort.png";
 import axios from "axios";
 import UserInfo from "./UserInfo";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons"; // unfilled heart
+import { faHeart as fasHeart, faLink, faCartShopping } from "@fortawesome/free-solid-svg-icons"; // solid heart, link, and cart
 
 function App() {
   const [showProfile, setShowProfile] = useState(false);
@@ -16,6 +19,13 @@ function App() {
   const toggleProfile = () => {
     setShowProfile(!showProfile);
   };
+
+  const [liked, setLiked] = useState(false);
+
+  const toggleLike = () => {
+    setLiked(!liked);
+  };
+
 
   // Check the URL path and update the checkbox accordingly
   useEffect(() => {
@@ -157,27 +167,36 @@ function App() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((product, index) => (
-            <Link
-              to={`/product/${product._id}`}
-              key={index}
+            <div
               className="product-link"
             >
               <div className="product-card">
+              <Link to={`/product/${product._id}`} className="product-link"
+                    key={index}>
                 <div className="image-placeholder">
                   <img src={product.img} alt={product.img} />
                 </div>
                 <div className="row">
-                  <div>{product.name} </div>
+                   <div>{product.name} </div>
+                    
                   <div> ₹ {product.cost_per_day} </div>
                 </div>
-                <div className="product-actions">
-                  <span>💖</span>
-                  <span>🔗</span>
-                  <span>🛒</span>
-                </div>
+                </Link>
+                <div className="row">
+                <span onClick={toggleLike}>
+        <FontAwesomeIcon icon={liked ? fasHeart : farHeart} style={{ color: liked ? "red" : "black" }} />
+      </span>
+                <span>
+        <FontAwesomeIcon icon={faLink} />
+      </span>
+      <span>
+        <FontAwesomeIcon icon={faCartShopping} />
+      </span>
+      </div>
               </div>
-            </Link>
+            </div>
           ))}
+
         </div>
       </div>
 

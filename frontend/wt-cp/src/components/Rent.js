@@ -18,72 +18,15 @@ function convert(file) {
 
 const FormPage = () => {
   const navigate = useNavigate();
-  const materialsByCategory = {
-    Clothing: [
-      "Cotton",
-      "Wool",
-      "Silk",
-      "Linen",
-      "Polyester",
-      "Rayon",
-      "Rayon",
-      "Nylon",
-      "Spandex",
-      "Denim",
-      "Velvet",
-      "Leather",
-    ],
-    Accessories: [
-      "Leather",
-      "Metal",
-      "Plastic",
-      "Acrylic",
-      "Glass",
-      "Wood",
-      "Rubber",
-      "Silicone",
-      "Beads",
-      "Pearls",
-      "Feathers",
-    ],
-    Footwear: [
-      "Leather",
-      "Suede",
-      "Canvas",
-      "Rubber",
-      "Synthetic Leather",
-      "Mesh",
-      "Foam",
-      "PVC",
-      "Neoprene",
-      "Textile",
-    ],
-    Costumes: [
-      "Polyester",
-      "Spandex",
-      "Nylon",
-      "Tulle",
-      "Sequins",
-      "Feathers",
-      "Faux Fur",
-      "Satin",
-      "Velvet",
-      "Lycra",
-    ],
-  };
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     sub_category: "",
-    material: "",
-    type: "",
     available_quantity: 0,
-    fit_type: "",
-    collar_styles: "",
     size: "",
-    sleeve_style: "NA",
-    brand: "",
     cost_per_day: 0,
+    product_description: "",
   });
   const [img, setImg] = useState("");
   const handleFileUpload = async (e) => {
@@ -137,7 +80,7 @@ const FormPage = () => {
       <h2>Upload Product Details</h2>
       <form onSubmit={handleSubmit}>
         {/* Name */}
-        <label>Name</label>
+        <label>Product Name</label>
         <input
           type="text"
           name="name"
@@ -185,59 +128,12 @@ const FormPage = () => {
           <option value="Footwear">Footwear</option>
         </select>
 
-        {/* Material */}
-        <label>Material</label>
-        <select
-          name="material"
-          value={formData.material}
-          onChange={handleChange}
-          required
-          disabled={!formData.sub_category}
-        >
-          {formData.sub_category &&
-            materialsByCategory[formData.sub_category].map((material) => (
-              <option key={material} value={material}>
-                {material}
-              </option>
-            ))}
-        </select>
-
-        {/* Type */}
-        <label>Type</label>
-        <input
-          type="text"
-          name="type"
-          value={formData.type}
-          onChange={handleChange}
-          required
-        />
-
         {/* Available Quantity */}
         <label>Available Quantity</label>
         <input
           type="number"
           name="available_quantity"
           value={formData.available_quantity}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Fit Type */}
-        <label>Fit Type</label>
-        <input
-          type="text"
-          name="fit_type"
-          value={formData.fit_type}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Collar Styles */}
-        <label>Collar Styles</label>
-        <input
-          type="text"
-          name="collar_styles"
-          value={formData.collar_styles}
           onChange={handleChange}
           required
         />
@@ -252,36 +148,21 @@ const FormPage = () => {
           required
         />
 
-        {/* Sleeve Style */}
-        {formData.sub_category === "Clothing" ||
-        formData.sub_category === "Costumes" ? (
-          <>
-            <label>Sleeve Style</label>
-            <input
-              type="text"
-              name="sleeve_style"
-              value={formData.sleeve_style}
-              onChange={handleChange}
-            />
-          </>
-        ) : null}
-
-        {/* Brand */}
-        <label>Brand</label>
-        <input
-          type="text"
-          name="brand"
-          value={formData.brand}
-          onChange={handleChange}
-          required
-        />
-
         {/* Cost per Day */}
         <label>Cost per Day</label>
         <input
           type="number"
           name="cost_per_day"
           value={formData.cost_per_day}
+          onChange={handleChange}
+          required
+        />
+
+        <label>Product description</label>
+        <input
+          type="text"
+          name="product_description"
+          value={formData.product_description}
           onChange={handleChange}
           required
         />
