@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Shopping.css";
 
 export default function UserInfo() {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ export default function UserInfo() {
     getInfo();
   }, []);
 
+  const logOut = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <div className="profile-section">
       <div className="profile-details">
@@ -39,8 +45,18 @@ export default function UserInfo() {
         <br />
         <p>Items Added to Rent: 5</p>
         <br /> */}
+        <button
+          className="switch-account"
+          onClick={() => navigate("/myProducts")}
+        >
+          My Products
+        </button>
+
         <button className="switch-account" onClick={() => navigate("/login")}>
           Switch Account
+        </button>
+        <button className="switch-account" onClick={logOut}>
+          Log Out
         </button>
       </div>
     </div>

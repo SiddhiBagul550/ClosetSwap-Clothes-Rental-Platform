@@ -1,10 +1,9 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import back from "./assets/image.png"; // Background image
 import img from "./assets/ClosetSwapNew.png"; // Image for the left side
 
-const LoginPage = ({ setIsLoggedIn }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
           const jwtToken = response.data.token;
           localStorage.setItem("jwtToken", jwtToken);
           localStorage.setItem("userId", response.data.data.user._id);
-          navigate("/home");
+          navigate("/splash");
         } else {
           alert("Login failed, please try again.");
         }
@@ -122,7 +121,7 @@ const styles = {
     height: "100%",
     background: "linear-gradient(to right, #ACD1CB, #FFFFFF)", // Gradient from mint to white
   },
-  
+
   loginBox: {
     backgroundColor: "#ffffff", // White box for the login
     padding: "40px",

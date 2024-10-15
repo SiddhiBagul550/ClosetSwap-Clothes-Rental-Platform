@@ -9,7 +9,6 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "./components/LoginPage";
-import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import SignupPage from "./components/SignupPage";
 import SplashScreen from "./components/SplashScreen";
@@ -21,6 +20,7 @@ import WomenShopping from "./components/WomenShopping";
 import KidsShopping from "./components/KidsShopping";
 import Liked from "./components/Liked";
 import Rent from "./components/Rent";
+import MyProducts from "./components/myProducts";
 
 function App() {
   return (
@@ -103,19 +103,18 @@ function App() {
         />
 
         <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/splash"
           element={
             <ProtectedRoute>
               <SplashScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/myProducts"
+          element={
+            <ProtectedRoute>
+              <MyProducts />
             </ProtectedRoute>
           }
         />
@@ -124,7 +123,7 @@ function App() {
           path="/"
           element={
             localStorage.getItem("jwtToken") ? (
-              <Navigate to="/home" />
+              <Navigate to="/splash" />
             ) : (
               <Navigate to="/login" />
             )

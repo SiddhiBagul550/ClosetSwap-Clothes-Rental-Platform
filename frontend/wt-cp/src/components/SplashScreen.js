@@ -1,30 +1,32 @@
-// 
+//
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // Hook to navigate to another page
-import igm from './assets/ClosetSwap.jpg';
+import { useNavigate } from "react-router-dom";
+import img from "./assets/ClosetSwapNew.png";
 
 export default function SplashScreen() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Splash screen stays for 3 seconds, then navigates to the main page ("/home")
+    // Redirect after 3 seconds
     const timer = setTimeout(() => {
-      navigate('/home');  // Replace '/home' with your desired route
-    }, 3000);
+      navigate("/shopping"); // Navigate to the category page
+    }, 3000); // 3000ms = 3 seconds
 
-    // Cleanup the timer when the component unmounts
+    // Cleanup the timer
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
-    <div style={{ backgroundColor: '#D8ACA1', height: '100vh', width: '100vw' }}>
+    <div
+      style={{ backgroundColor: "#ACD1CB", height: "100vh", width: "100vw" }}
+    >
       <img
-        src={igm}
+        src={img}
         alt="Closet Swap"
         style={{
-          height: '100vh',
-          width: '100vw',
-          objectFit: 'contain'
+          height: "100vh",
+          width: "100vw",
+          objectFit: "contain",
         }}
       />
     </div>

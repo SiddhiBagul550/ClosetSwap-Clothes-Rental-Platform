@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Shopping.css";
-import logo from "./assets/ClosetSwapNew.png";
+import NavBar from "./navBar";
 import axios from "axios";
-import UserInfo from "./UserInfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons"; // unfilled heart
 import {
@@ -13,92 +12,118 @@ import {
 } from "@fortawesome/free-solid-svg-icons"; // solid heart, link, and cart
 
 function App() {
-  const [showProfile, setShowProfile] = useState(false);
   const [products, setProducts] = useState([]);
-  const [likeditems, setlikeditems] = useState([]); // State for liked products
-  const navigate = useNavigate(); // Use navigate instead of history
+  const [likeditems, setlikeditems] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const location = useLocation();
 
-  // Toggle profile visibility
-  const toggleProfile = () => {
-    setShowProfile(!showProfile);
+  const buildURL = () => {
+    console.log("Sub : " + selectedSubCategories);
+    let baseURL = "http://127.0.0.1:3001/api/v1/products?";
+    if (selectedCategories.length !== 0) {
+      selectedCategories.forEach((value) => {
+        baseURL += `category=${value}&`;
+      });
+    }
+    if (selectedSubCategories.length !== 0) {
+      selectedSubCategories.forEach((value) => {
+        baseURL += `sub_category=${value}&`;
+      });
+    }
+    return baseURL;
   };
 
-  // Fetch products on component mount and URL path change
   useEffect(() => {
-    // if (selectedCategories.length !== 0) {
-    //   setUrl(url + `?category=${selectedCategories[0]}`);
-    //   console.log(url);
-    // }
     const getProducts = async () => {
+      const tempURL = buildURL();
       try {
-        const response = await axios.get(
-          "http://127.0.0.1:3001/api/v1/products",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.jwtToken}`, // Set your token or any other header
-            },
-          }
-        );
+        const response = await axios.get(tempURL, {
+          headers: {
+            Authorization: `Bearer ${localStorage.jwtToken}`,
+          },
+        });
         setProducts(response.data.data.products);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
     getProducts();
-  }, [location.pathname]);
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    if (name === "men" && checked) {
-      navigate("/men"); // Use navigate instead of history.push
+    const getUserInfo = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:3001/api/v1/users/${localStorage.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.jwtToken}`,
+            },
+          }
+        );
+        setlikeditems(response.data.data.user.likeditems);
+      } catch (error) {
+        console.error("Error :", error);
+      }
+    };
+    getUserInfo();
+  }, [location.pathname, selectedCategories, selectedSubCategories]);
+
+  const likeAndUnlike = async (e) => {
+    const productId = e.currentTarget.getAttribute("data-id");
+
+    // Now make the API call to reflect the change on the server
+    try {
+      await axios.post(
+        `http://127.0.0.1:3001/api/v1/users/like/${localStorage.userId}`,
+        {
+          productId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.jwtToken}`,
+          },
+        }
+      );
+      // Optimistically update the liked items before the API call
+      setlikeditems((prevLiked) => {
+        if (prevLiked.includes(productId)) {
+          return prevLiked.filter((id) => id !== productId); // Remove if already liked
+        } else {
+          return [...prevLiked, productId]; // Add to liked
+        }
+      });
+    } catch (error) {
+      console.error("Error updating like status:", error);
     }
   };
 
-  // Toggle like for a specific product
-  const toggleLike = (productId) => {
-    setlikeditems((prevLiked) => {
-      if (prevLiked.includes(productId)) {
-        return prevLiked.filter((id) => id !== productId); // Remove if already liked
-      } else {
-        return [...prevLiked, productId]; // Add to liked
-      }
-    });
+  const categoryHandler = (e) => {
+    const { value, checked } = e.target;
+
+    if (checked) {
+      setSelectedCategories((prev) => [...prev, value]);
+    } else {
+      setSelectedCategories((prev) =>
+        prev.filter((category) => category !== value)
+      );
+    }
+  };
+  const subCategoryHandler = (e) => {
+    const { value, checked } = e.target;
+
+    if (checked) {
+      setSelectedSubCategories((prev) => [...prev, value]);
+    } else {
+      setSelectedSubCategories((prev) =>
+        prev.filter((category) => category !== value)
+      );
+    }
   };
 
   return (
     <div className="app-container">
       {/* Top Bar */}
-      <header className="header">
-        <img
-          src={logo}
-          alt="Closet Swap"
-          style={{
-            height: "7vh",
-            width: "10vw",
-            objectFit: "contain",
-          }}
-        />
-        <div className="search-bar">
-          <input type="text" placeholder="Search for products" />
-          <button className="voice-icon">🎤</button>
-        </div>
-        <div className="top-bar-icons">
-          <Link to="/rent" className="rent-button">
-            ➕ Rent
-          </Link>
-          <Link to="/liked-items" className="top-icon">
-            💖 Liked Items
-          </Link>
-          <Link to="/cart" className="top-icon">
-            🛒 Cart
-          </Link>
-          <div className="profile-icon" onClick={toggleProfile}>
-            👤 Profile
-          </div>
-        </div>
-      </header>
-
+      <NavBar />
       {/* Main content with filters and product grid */}
       <div className="main-content">
         {/* Filter section */}
@@ -107,27 +132,15 @@ function App() {
           <div className="filter-group">
             <h4>Category</h4>
             <label>
-              <input
-                type="checkbox"
-                value="men"
-                onChange={handleCheckboxChange}
-              />{" "}
+              <input type="checkbox" value="men" onChange={categoryHandler} />{" "}
               Men
             </label>
             <label>
-              <input
-                type="checkbox"
-                value="women"
-                onChange={handleCheckboxChange}
-              />{" "}
+              <input type="checkbox" value="women" onChange={categoryHandler} />{" "}
               Women
             </label>
             <label>
-              <input
-                type="checkbox"
-                value="kids"
-                onChange={handleCheckboxChange}
-              />{" "}
+              <input type="checkbox" value="kids" onChange={categoryHandler} />{" "}
               Kids
             </label>
           </div>
@@ -135,42 +148,36 @@ function App() {
           <div className="filter-group">
             <h4>Subcategories</h4>
             <label>
-              <input type="checkbox" /> Clothing
+              <input
+                type="checkbox"
+                value="Clothing"
+                onChange={subCategoryHandler}
+              />{" "}
+              Clothing
             </label>
             <label>
-              <input type="checkbox" /> Costume
+              <input
+                type="checkbox"
+                value="Costumes"
+                onChange={subCategoryHandler}
+              />{" "}
+              Costumes
             </label>
             <label>
-              <input type="checkbox" /> Footwear
+              <input
+                type="checkbox"
+                value="Footwear"
+                onChange={subCategoryHandler}
+              />{" "}
+              Footwear
             </label>
             <label>
-              <input type="checkbox" /> Accessories
-            </label>
-          </div>
-
-          <div className="filter-group">
-            <h4>Price</h4>
-            <label>
-              <input type="checkbox" /> Under ₹100
-            </label>
-            <label>
-              <input type="checkbox" /> ₹100 - ₹500
-            </label>
-          </div>
-
-          <div className="filter-group">
-            <h4>Seller</h4>
-            <label>
-              <input type="checkbox" /> Seller A
-            </label>
-            <label>
-              <input type="checkbox" /> Seller B
-            </label>
-            <label>
-              <input type="checkbox" /> Seller C
-            </label>
-            <label>
-              <input type="checkbox" /> Seller D
+              <input
+                type="checkbox"
+                value="Accessories"
+                onChange={subCategoryHandler}
+              />{" "}
+              Accessories
             </label>
           </div>
         </aside>
@@ -190,7 +197,7 @@ function App() {
                   </div>
                 </Link>
                 <div className="row">
-                  <span onClick={() => toggleLike(product._id)}>
+                  <span data-id={product._id} onClick={likeAndUnlike}>
                     <FontAwesomeIcon
                       icon={
                         likeditems.includes(product._id) ? fasHeart : farHeart
@@ -214,9 +221,6 @@ function App() {
           ))}
         </div>
       </div>
-
-      {/* Profile section */}
-      {showProfile && <UserInfo />}
     </div>
   );
 }
