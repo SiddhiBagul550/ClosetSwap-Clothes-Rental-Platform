@@ -4,14 +4,19 @@ import "./Shopping.css";
 import logo from "./assets/ClosetShort.png";
 import axios from "axios";
 import UserInfo from "./UserInfo";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons"; // unfilled heart
-import { faHeart as fasHeart, faLink, faCartShopping } from "@fortawesome/free-solid-svg-icons"; // solid heart, link, and cart
+import {
+  faHeart as fasHeart,
+  faLink,
+  faCartShopping,
+} from "@fortawesome/free-solid-svg-icons"; // solid heart, link, and cart
 
 function App() {
   const [showProfile, setShowProfile] = useState(false);
-  const [isMenChecked, setIsMenChecked] = useState(false);
   const [products, setProducts] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [url, setUrl] = useState("http://127.0.0.1:3001/api/v1/products");
 
   const navigate = useNavigate(); // Use navigate instead of history
   const location = useLocation();
@@ -26,9 +31,12 @@ function App() {
     setLiked(!liked);
   };
 
-
   // Check the URL path and update the checkbox accordingly
   useEffect(() => {
+    if (selectedCategories.length !== 0) {
+      setUrl(url + `?category=${selectedCategories[0]}`);
+      console.log(url);
+    }
     const getProducts = async () => {
       try {
         const response = await axios.get(
@@ -39,27 +47,27 @@ function App() {
             },
           }
         );
-        console.log(response.data.data.products);
         setProducts(response.data.data.products);
       } catch (error) {
         setProducts(error);
       }
     };
     getProducts();
-    if (location.pathname === "/men") {
-      setIsMenChecked(true);
-    } else {
-      setIsMenChecked(false);
-    }
-  }, [location.pathname]);
+  }, [location.pathname, selectedCategories]);
 
   const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
+    const { value, checked } = e.target;
 
-    if (name === "men" && checked) {
-      // Redirect to /men page if Men is checked
-      navigate("/men"); // Use navigate instead of history.push
+    if (checked) {
+      // Add the category to the selectedCategories array
+      setSelectedCategories((prev) => [...prev, value]);
+    } else {
+      // Remove the category from the selectedCategories array
+      setSelectedCategories((prev) =>
+        prev.filter((category) => category !== value)
+      );
     }
+    console.log(selectedCategories);
   };
 
   return (
@@ -107,17 +115,26 @@ function App() {
             <label>
               <input
                 type="checkbox"
-                name="men"
-                checked={isMenChecked}
+                value="men"
                 onChange={handleCheckboxChange}
               />{" "}
               Men
             </label>
             <label>
-              <input type="checkbox" /> Women
+              <input
+                type="checkbox"
+                value="women"
+                onChange={handleCheckboxChange}
+              />{" "}
+              Women
             </label>
             <label>
-              <input type="checkbox" /> Kids
+              <input
+                type="checkbox"
+                value="kids"
+                onChange={handleCheckboxChange}
+              />{" "}
+              Kids
             </label>
           </div>
 
@@ -167,36 +184,39 @@ function App() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((product, index) => (
-            <div
-              className="product-link"
-            >
+            <div className="product-link">
               <div className="product-card">
-              <Link to={`/product/${product._id}`} className="product-link"
-                    key={index}>
-                <div className="image-placeholder">
-                  <img src={product.img} alt={product.img} />
-                </div>
-                <div className="row">
-                   <div>{product.name} </div>
-                    
-                  <div> ₹ {product.cost_per_day} </div>
-                </div>
+                <Link
+                  to={`/product/${product._id}`}
+                  className="product-link"
+                  key={index}
+                >
+                  <div className="image-placeholder">
+                    <img src={product.img} alt={product.img} />
+                  </div>
+                  <div className="row">
+                    <div>{product.name} </div>
+
+                    <div> ₹ {product.cost_per_day} </div>
+                  </div>
                 </Link>
                 <div className="row">
-                <span onClick={toggleLike}>
-        <FontAwesomeIcon icon={liked ? fasHeart : farHeart} style={{ color: liked ? "red" : "black" }} />
-      </span>
-                <span>
-        <FontAwesomeIcon icon={faLink} />
-      </span>
-      <span>
-        <FontAwesomeIcon icon={faCartShopping} />
-      </span>
-      </div>
+                  <span onClick={toggleLike}>
+                    <FontAwesomeIcon
+                      icon={liked ? fasHeart : farHeart}
+                      style={{ color: liked ? "red" : "black" }}
+                    />
+                  </span>
+                  <span>
+                    <FontAwesomeIcon icon={faLink} />
+                  </span>
+                  <span>
+                    <FontAwesomeIcon icon={faCartShopping} />
+                  </span>
+                </div>
               </div>
             </div>
           ))}
-
         </div>
       </div>
 
