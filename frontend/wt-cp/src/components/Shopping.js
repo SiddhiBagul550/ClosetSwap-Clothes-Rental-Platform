@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
 import "./Shopping.css";
-import logo from "./assets/ClosetShort.png";
+import logo from "./assets/ClosetSwapNew.png";
 import axios from "axios";
 import UserInfo from "./UserInfo";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,22 +12,16 @@ function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [isMenChecked, setIsMenChecked] = useState(false);
   const [products, setProducts] = useState([]);
-
+  const [likeditems, setlikeditems] = useState([]); // State for liked products
   const navigate = useNavigate(); // Use navigate instead of history
   const location = useLocation();
 
+  // Toggle profile visibility
   const toggleProfile = () => {
     setShowProfile(!showProfile);
   };
 
-  const [liked, setLiked] = useState(false);
-
-  const toggleLike = () => {
-    setLiked(!liked);
-  };
-
-
-  // Check the URL path and update the checkbox accordingly
+  // Fetch products on component mount and URL path change
   useEffect(() => {
     const getProducts = async () => {
       try {
@@ -39,10 +33,9 @@ function App() {
             },
           }
         );
-        console.log(response.data.data.products);
         setProducts(response.data.data.products);
       } catch (error) {
-        setProducts(error);
+        console.error("Error fetching products:", error);
       }
     };
     getProducts();
@@ -55,11 +48,20 @@ function App() {
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-
     if (name === "men" && checked) {
-      // Redirect to /men page if Men is checked
       navigate("/men"); // Use navigate instead of history.push
     }
+  };
+
+  // Toggle like for a specific product
+  const toggleLike = (productId) => {
+    setlikeditems((prevLiked) => {
+      if (prevLiked.includes(productId)) {
+        return prevLiked.filter(id => id !== productId); // Remove if already liked
+      } else {
+        return [...prevLiked, productId]; // Add to liked
+      }
+    });
   };
 
   return (
@@ -79,20 +81,11 @@ function App() {
           <input type="text" placeholder="Search for products" />
           <button className="voice-icon">🎤</button>
         </div>
-
         <div className="top-bar-icons">
-          <Link to="/rent" className="rent-button">
-            ➕ Rent
-          </Link>
-          <Link to="/liked-items" className="top-icon">
-            💖 Liked Items
-          </Link>
-          <Link to="/cart" className="top-icon">
-            🛒 Cart
-          </Link>
-          <div className="profile-icon" onClick={toggleProfile}>
-            👤 Profile
-          </div>
+          <Link to="/rent" className="rent-button">➕ Rent</Link>
+          <Link to="/liked-items" className="top-icon">💖 Liked Items</Link>
+          <Link to="/cart" className="top-icon">🛒 Cart</Link>
+          <div className="profile-icon" onClick={toggleProfile}>👤 Profile</div>
         </div>
       </header>
 
@@ -101,7 +94,6 @@ function App() {
         {/* Filter section */}
         <aside className="filter-section">
           <h3>Filters</h3>
-
           <div className="filter-group">
             <h4>Category</h4>
             <label>
@@ -110,8 +102,7 @@ function App() {
                 name="men"
                 checked={isMenChecked}
                 onChange={handleCheckboxChange}
-              />{" "}
-              Men
+              />{" "}Men
             </label>
             <label>
               <input type="checkbox" /> Women
@@ -167,36 +158,34 @@ function App() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((product, index) => (
-            <div
-              className="product-link"
-            >
+            <div className="product-link" key={index}>
               <div className="product-card">
-              <Link to={`/product/${product._id}`} className="product-link"
-                    key={index}>
-                <div className="image-placeholder">
-                  <img src={product.img} alt={product.img} />
-                </div>
-                <div className="row">
-                   <div>{product.name} </div>
-                    
-                  <div> ₹ {product.cost_per_day} </div>
-                </div>
+                <Link to={`/product/${product._id}`} className="product-link">
+                  <div className="image-placeholder">
+                    <img src={product.img} alt={product.img} />
+                  </div>
+                  <div className="row">
+                    <div>{product.name}</div>
+                    <div>₹ {product.cost_per_day}</div>
+                  </div>
                 </Link>
                 <div className="row">
-                <span onClick={toggleLike}>
-        <FontAwesomeIcon icon={liked ? fasHeart : farHeart} style={{ color: liked ? "red" : "black" }} />
-      </span>
-                <span>
-        <FontAwesomeIcon icon={faLink} />
-      </span>
-      <span>
-        <FontAwesomeIcon icon={faCartShopping} />
-      </span>
-      </div>
+                  <span onClick={() => toggleLike(product._id)}>
+                    <FontAwesomeIcon
+                      icon={likeditems.includes(product._id) ? fasHeart : farHeart}
+                      style={{ color: likeditems.includes(product._id) ? "red" : "black" }}
+                    />
+                  </span>
+                  <span>
+                    <FontAwesomeIcon icon={faLink} />
+                  </span>
+                  <span>
+                    <FontAwesomeIcon icon={faCartShopping} />
+                  </span>
+                </div>
               </div>
             </div>
           ))}
-
         </div>
       </div>
 

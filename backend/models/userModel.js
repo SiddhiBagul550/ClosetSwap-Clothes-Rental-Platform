@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
 
   password: {
     type: String,
-    required: [true, "Please entre your password"],
+    required: [true, "Please enter your password"],
     minlength: 8,
     select: false, // don't show in result
   },
@@ -44,6 +44,11 @@ const userSchema = mongoose.Schema({
     type: String,
     require: [true, "Please enter your address"],
   },
+
+  likeditems:{
+    type: [String],
+  },
+  
 
   passwordChangedAt: Date,
 });
