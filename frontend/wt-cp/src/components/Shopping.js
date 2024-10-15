@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use useNavigate instead of useHistory
 import "./Shopping.css";
-import logo from "./assets/ClosetShort.png";
+import logo from "./assets/ClosetSwapNew.png";
 import axios from "axios";
 import UserInfo from "./UserInfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,23 +15,16 @@ import {
 function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [products, setProducts] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [url, setUrl] = useState("http://127.0.0.1:3001/api/v1/products");
-
+  const [likeditems, setlikeditems] = useState([]); // State for liked products
   const navigate = useNavigate(); // Use navigate instead of history
   const location = useLocation();
 
+  // Toggle profile visibility
   const toggleProfile = () => {
     setShowProfile(!showProfile);
   };
 
-  const [liked, setLiked] = useState(false);
-
-  const toggleLike = () => {
-    setLiked(!liked);
-  };
-
-  // Check the URL path and update the checkbox accordingly
+  // Fetch products on component mount and URL path change
   useEffect(() => {
     if (selectedCategories.length !== 0) {
       setUrl(url + `?category=${selectedCategories[0]}`);
@@ -49,25 +42,28 @@ function App() {
         );
         setProducts(response.data.data.products);
       } catch (error) {
-        setProducts(error);
+        console.error("Error fetching products:", error);
       }
     };
     getProducts();
   }, [location.pathname, selectedCategories]);
 
   const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-
-    if (checked) {
-      // Add the category to the selectedCategories array
-      setSelectedCategories((prev) => [...prev, value]);
-    } else {
-      // Remove the category from the selectedCategories array
-      setSelectedCategories((prev) =>
-        prev.filter((category) => category !== value)
-      );
+    const { name, checked } = e.target;
+    if (name === "men" && checked) {
+      navigate("/men"); // Use navigate instead of history.push
     }
-    console.log(selectedCategories);
+  };
+
+  // Toggle like for a specific product
+  const toggleLike = (productId) => {
+    setlikeditems((prevLiked) => {
+      if (prevLiked.includes(productId)) {
+        return prevLiked.filter((id) => id !== productId); // Remove if already liked
+      } else {
+        return [...prevLiked, productId]; // Add to liked
+      }
+    });
   };
 
   return (
@@ -87,7 +83,6 @@ function App() {
           <input type="text" placeholder="Search for products" />
           <button className="voice-icon">🎤</button>
         </div>
-
         <div className="top-bar-icons">
           <Link to="/rent" className="rent-button">
             ➕ Rent
@@ -109,7 +104,6 @@ function App() {
         {/* Filter section */}
         <aside className="filter-section">
           <h3>Filters</h3>
-
           <div className="filter-group">
             <h4>Category</h4>
             <label>
@@ -184,27 +178,28 @@ function App() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((product, index) => (
-            <div className="product-link">
+            <div className="product-link" key={index}>
               <div className="product-card">
-                <Link
-                  to={`/product/${product._id}`}
-                  className="product-link"
-                  key={index}
-                >
+                <Link to={`/product/${product._id}`} className="product-link">
                   <div className="image-placeholder">
                     <img src={product.img} alt={product.img} />
                   </div>
                   <div className="row">
-                    <div>{product.name} </div>
-
-                    <div> ₹ {product.cost_per_day} </div>
+                    <div>{product.name}</div>
+                    <div>₹ {product.cost_per_day}</div>
                   </div>
                 </Link>
                 <div className="row">
-                  <span onClick={toggleLike}>
+                  <span onClick={() => toggleLike(product._id)}>
                     <FontAwesomeIcon
-                      icon={liked ? fasHeart : farHeart}
-                      style={{ color: liked ? "red" : "black" }}
+                      icon={
+                        likeditems.includes(product._id) ? fasHeart : farHeart
+                      }
+                      style={{
+                        color: likeditems.includes(product._id)
+                          ? "red"
+                          : "black",
+                      }}
                     />
                   </span>
                   <span>

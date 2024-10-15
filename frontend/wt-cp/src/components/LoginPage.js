@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import back from "./assets/image.png"; // Background image
-import img from "./assets/ClosetSwap.jpg"; // Image for the left side
+import img from "./assets/ClosetSwapNew.png"; // Image for the left side
 
 const LoginPage = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState("");
@@ -101,7 +101,7 @@ const styles = {
     alignItems: "center",
     padding: "40px",
     height: "100%",
-    backgroundColor: "#D8ACA1", // soft pastel for the left side
+    backgroundColor: "#ACD1CB", // Solid mint color for the left side
   },
   image: {
     width: "80%",
@@ -120,8 +120,9 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
-    background: "linear-gradient(to left, #FFF8E1, #D8ACA1)", // Smooth gradient between soft pastel yellow and light pastel
+    background: "linear-gradient(to right, #ACD1CB, #FFFFFF)", // Gradient from mint to white
   },
+  
   loginBox: {
     backgroundColor: "#ffffff", // White box for the login
     padding: "40px",
@@ -160,7 +161,7 @@ const styles = {
     transition: "background-color 0.3s",
   },
   text: {
-    color: "#4A4A4A",
+    color: "#0E2656",
     marginTop: "10px",
   },
   link: {

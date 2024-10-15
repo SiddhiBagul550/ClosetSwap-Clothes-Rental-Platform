@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import img from "./assets/ClosetSwap.jpg"; // Update image path if needed
+import img from "./assets/ClosetSwapNew.png"; // Update image path if needed
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function HomePage() {
 
   return (
     <div
-      style={{ backgroundColor: "#D8ACA1", height: "100vh", width: "100vw" }}
+      style={{ backgroundColor: "#ACD1CB", height: "100vh", width: "100vw" }}
     >
       <img
         src={img}
