@@ -25,34 +25,38 @@ exports.getUser = catchAsync(async (req, res, next) => {
 });
 
 exports.Liked = catchAsync(async (req, res, next) => {
-
   // Add or remove liked product
-  const id = req.params.id;
+  const userId = req.params.id;
   const productId = req.body.productId;
 
   try {
-    const user = await User.findById(id);
-    
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // Use $pull to remove the product if it's liked, or $addToSet to add it
+    const user = await User.findById(userId);
 
-    const isLiked = user.likeditems.includes(productId);
-
-    if (isLiked) {
-      user.likeditems = user.likeditems.filter((id) => id.toString() !== productId);
-    } else {
-      user.likeditems.push(productId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    await user.save();
-    res.status(200).json({ likeditems: user.likeditems });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    let updatedUser;
+    if (user.likeditems.includes(productId)) {
+      // Remove liked product
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { likeditems: productId } },
+        { new: true } // Return the updated document
+      );
+    } else {
+      // Add liked product
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { likeditems: productId } }, // $addToSet prevents duplicates
+        { new: true } // Return the updated document
+      );
+    }
 
-  // res.status(200).json({
-  //   status: "success",
-  //   data: {
-  //     user,
-  //   },
-  // });
+    // Send the response with the updated liked items
+    return res.status(200).json({ likeditems: updatedUser.likeditems });
+  } catch (error) {
+    return next(error); // Pass error to the next middleware
+  }
 });

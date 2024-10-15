@@ -26,10 +26,10 @@ function App() {
 
   // Fetch products on component mount and URL path change
   useEffect(() => {
-    if (selectedCategories.length !== 0) {
-      setUrl(url + `?category=${selectedCategories[0]}`);
-      console.log(url);
-    }
+    // if (selectedCategories.length !== 0) {
+    //   setUrl(url + `?category=${selectedCategories[0]}`);
+    //   console.log(url);
+    // }
     const getProducts = async () => {
       try {
         const response = await axios.get(
@@ -46,7 +46,7 @@ function App() {
       }
     };
     getProducts();
-  }, [location.pathname, selectedCategories]);
+  }, [location.pathname]);
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;

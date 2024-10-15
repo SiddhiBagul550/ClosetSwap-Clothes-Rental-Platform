@@ -45,10 +45,9 @@ const userSchema = mongoose.Schema({
     require: [true, "Please enter your address"],
   },
 
-  likeditems:{
+  likeditems: {
     type: [String],
   },
-  
 
   passwordChangedAt: Date,
 });
