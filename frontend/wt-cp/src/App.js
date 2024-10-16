@@ -1,6 +1,5 @@
 // src/App.js
 import React from "react";
-import CategoryPage from "./components/CategoryPage";
 import {
   BrowserRouter as Router,
   Route,
@@ -8,19 +7,22 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import LoginPage from "./components/LoginPage";
-import ProtectedRoute from "./components/ProtectedRoutes";
-import SignupPage from "./components/SignupPage";
-import SplashScreen from "./components/SplashScreen";
-import Shopping from "./components/Shopping";
+import Cart from "./pages/Cart";
+import Rent from "./pages/Rent";
+import Liked from "./pages/Liked";
+import Shopping from "./pages/Shopping";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import MyProducts from "./pages/myProducts";
+import SplashScreen from "./pages/SplashScreen";
+import CategoryPage from "./pages/CategoryPage";
+import UpdateProduct from "./pages/UpdateProduct";
+
 import ProductCard from "./components/ProductCard";
-import Cart from "./components/Cart";
 import MenShopping from "./components/MenShopping";
-import WomenShopping from "./components/WomenShopping";
 import KidsShopping from "./components/KidsShopping";
-import Liked from "./components/Liked";
-import Rent from "./components/Rent";
-import MyProducts from "./components/myProducts";
+import WomenShopping from "./components/WomenShopping";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 function App() {
   return (
@@ -28,7 +30,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-
         <Route
           path="/category"
           element={
@@ -101,7 +102,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/splash"
           element={
@@ -117,8 +117,15 @@ function App() {
               <MyProducts />
             </ProtectedRoute>
           }
+        />{" "}
+        <Route
+          path="/updateProduct/:id"
+          element={
+            <ProtectedRoute>
+              <UpdateProduct />
+            </ProtectedRoute>
+          }
         />
-
         <Route
           path="/"
           element={

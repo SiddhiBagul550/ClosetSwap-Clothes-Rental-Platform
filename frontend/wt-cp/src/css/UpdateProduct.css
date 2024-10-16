@@ -1,0 +1,15 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+.update-product-heading {
+  margin: 20px 0;
+}
+
+.update-form {
+  width: 350px;
+  margin: 72px 0;
+}

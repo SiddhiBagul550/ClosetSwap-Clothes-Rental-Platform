@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "./navBar";
+import NavBar from "../components/navBar";
 import axios from "axios";
-import "./Shopping.css";
+import "../css/Shopping.css";
 import { Link, useLocation } from "react-router-dom";
 
 export default function MyProducts() {
@@ -54,7 +54,7 @@ export default function MyProducts() {
           {products.map((product, index) => (
             <div className="product-link" key={index}>
               <div className="product-card">
-                <Link className="product-link">
+                <div className="product-link">
                   <div className="image-placeholder">
                     <img src={product.img} alt={product.img} />
                   </div>
@@ -62,11 +62,13 @@ export default function MyProducts() {
                     <div>{product.name}</div>
                     <div>₹ {product.cost_per_day}</div>
                   </div>
-                </Link>
+                </div>
                 <div className="row">
-                  <button data-id={product._id} className="switch-account">
-                    Edit Product
-                  </button>
+                  <Link to={`/updateProduct/${product._id}`}>
+                    <button data-id={product._id} className="switch-account">
+                      Edit Product
+                    </button>
+                  </Link>
                   <button
                     data-id={product._id}
                     className="switch-account"

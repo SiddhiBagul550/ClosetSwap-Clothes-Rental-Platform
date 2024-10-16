@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom"; // Import Link for navigation
-import './Shopping.css'; 
+import "../css/Shopping.css";
 
 function App() {
   return (
@@ -17,7 +17,9 @@ function App() {
       {/* Product grid */}
       <div className="product-grid">
         {[...Array(6)].map((_, index) => (
-          <Link to={`/product/${index}`} key={index} className="product-link"> {/* Wrap product in a Link */}
+          <Link to={`/product/${index}`} key={index} className="product-link">
+            {" "}
+            {/* Wrap product in a Link */}
             <div className="product-card">
               <div className="image-placeholder"></div>
               <div className="product-actions">

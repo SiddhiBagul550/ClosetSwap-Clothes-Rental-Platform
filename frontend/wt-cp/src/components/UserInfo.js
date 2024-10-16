@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./Shopping.css";
+import "../css/Shopping.css";
 
 export default function UserInfo() {
   const navigate = useNavigate();

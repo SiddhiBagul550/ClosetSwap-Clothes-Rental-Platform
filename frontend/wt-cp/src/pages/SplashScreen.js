@@ -1,7 +1,7 @@
 //
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import img from "./assets/ClosetSwapNew.png";
+import img from "../assets/ClosetSwapNew.png";
 
 export default function SplashScreen() {
   const navigate = useNavigate();

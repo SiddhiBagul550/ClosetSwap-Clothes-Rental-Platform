@@ -1,36 +1,41 @@
 import axios from "axios";
+import img from "../assets/ClosetSwapNew.png"; // Image for the left side
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import img from "./assets/ClosetSwapNew.png"; // Image for the left side
 
-const LoginPage = () => {
+const SignupPage = () => {
+  const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [address, setAddress] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    if (email && password) {
+    if (username && email && password && passwordConfirm) {
       try {
         const response = await axios.post(
-          "http://localhost:3001/api/v1/users/login",
+          "http://localhost:3001/api/v1/users/signup",
           {
+            username,
             email,
             password,
+            passwordConfirm,
+            contactNumber,
+            address,
           }
         );
-
-        if (response.status === 200) {
-          alert("Login successful");
-          const jwtToken = response.data.token;
-          localStorage.setItem("jwtToken", jwtToken);
-          localStorage.setItem("userId", response.data.data.user._id);
-          navigate("/splash");
+        if (response.status === 201) {
+          alert("Signup successful");
+          navigate("/login");
         } else {
-          alert("Login failed, please try again.");
+          alert("Signup failed, please try again.");
         }
       } catch (error) {
-        alert("Error during login. Please try again.");
+        console.error("Error during signup:", error);
+        alert("Error during signup. Please try again.");
       }
     } else {
       alert("Please fill out all fields");
@@ -43,38 +48,66 @@ const LoginPage = () => {
       <div style={styles.leftSide}>
         <img src={img} alt="Closet Swap" style={styles.image} />
         <p style={styles.description}>
-          Hello!!! Welcome to ClosetSwap: Your e-rental store for clothing,
-          accessories, footwear, and costumes!
+          Join ClosetSwap: Your go-to e-rental store for fashion, accessories,
+          and more. Sign up today!
         </p>
       </div>
 
-      {/* Right Side with Login Form */}
+      {/* Right Side with Signup Form */}
       <div style={styles.rightSide}>
-        <div style={styles.loginBox}>
-          <h2 style={styles.heading}>Login to ClosetSwap</h2>
-          <form onSubmit={handleLogin} style={styles.form}>
+        <div style={styles.formContainer}>
+          <h2 style={styles.heading}>Create Account for ClosetSwap</h2>
+          <form onSubmit={handleSignup} style={styles.form}>
+            <input
+              type="text"
+              placeholder="Name"
+              value={username}
+              onChange={(e) => setName(e.target.value)}
+              style={styles.inputBlue}
+            />
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={styles.inputBlue} // Applying blue styles to email
+              style={styles.inputBlue}
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={styles.inputBlue} // Applying blue styles to password
+              style={styles.inputBlue}
+            />
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              style={styles.inputBlue}
+            />
+            <input
+              type="number"
+              placeholder="Contact Number"
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+              style={styles.inputBlue}
+            />
+            <input
+              type="text"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              style={styles.inputBlue}
             />
             <button type="submit" style={styles.button}>
-              Login
+              Sign Up
             </button>
           </form>
           <p style={styles.text}>
-            Don't have an account?{" "}
-            <span onClick={() => navigate("/signup")} style={styles.link}>
-              Sign Up
+            Already have an account?{" "}
+            <span onClick={() => navigate("/login")} style={styles.link}>
+              Log In
             </span>
           </p>
         </div>
@@ -102,6 +135,7 @@ const styles = {
     height: "100%",
     backgroundColor: "#ACD1CB", // Solid mint color for the left side
   },
+
   image: {
     width: "80%",
     height: "auto",
@@ -121,9 +155,8 @@ const styles = {
     height: "100%",
     background: "linear-gradient(to right, #ACD1CB, #FFFFFF)", // Gradient from mint to white
   },
-
-  loginBox: {
-    backgroundColor: "#ffffff", // White box for the login
+  formContainer: {
+    backgroundColor: "#ffffff", // White box for the signup
     padding: "40px",
     borderRadius: "20px", // Rounded edges
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Soft shadow for the rounded box
@@ -170,4 +203,4 @@ const styles = {
   },
 };
 
-export default LoginPage;
+export default SignupPage;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import "./Shopping.css";
-import NavBar from "./navBar";
+import "../css/Shopping.css";
+import NavBar from "../components/navBar";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons"; // unfilled heart
@@ -19,7 +19,6 @@ function App() {
   const location = useLocation();
 
   const buildURL = () => {
-    console.log("Sub : " + selectedSubCategories);
     let baseURL = "http://127.0.0.1:3001/api/v1/products?";
     if (selectedCategories.length !== 0) {
       selectedCategories.forEach((value) => {
@@ -191,7 +190,7 @@ function App() {
                   <div className="image-placeholder">
                     <img src={product.img} alt={product.img} />
                   </div>
-                  <div className="row">
+                  <div className="row p10">
                     <div>{product.name}</div>
                     <div>₹ {product.cost_per_day}</div>
                   </div>
