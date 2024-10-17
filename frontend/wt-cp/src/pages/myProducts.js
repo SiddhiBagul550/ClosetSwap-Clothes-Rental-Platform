@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "../components/navBar";
 import axios from "axios";
-import "../css/Shopping.css";
+// import "../css/Shopping.css";
 import { Link, useLocation } from "react-router-dom";
 
 export default function MyProducts() {

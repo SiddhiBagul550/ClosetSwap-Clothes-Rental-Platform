@@ -9,7 +9,8 @@ import {
   faHeart as fasHeart,
   faLink,
   faCartShopping,
-} from "@fortawesome/free-solid-svg-icons"; // solid heart, link, and cart
+  faFilter,
+} from "@fortawesome/free-solid-svg-icons";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -128,6 +129,8 @@ function App() {
         {/* Filter section */}
         <aside className="filter-section">
           <h3>Filters</h3>
+          <br />
+          <br />
           <div className="filter-group">
             <h4>Category</h4>
             <label>

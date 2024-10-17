@@ -1,6 +1,7 @@
 // src/components/Liked.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import NavBar from "../components/navBar";
 
 const Liked = () => {
   const price1 = 50; // price for product 1
@@ -41,29 +42,32 @@ const Liked = () => {
   }, []);
 
   return (
-    <div style={styles.container}>
-      s<h2 style={styles.heading}>Liked Items</h2>
-      {products.map((product, index) => {
-        return likeditems.includes(product._id) ? (
-          <div style={styles.likedItem} key={index}>
-            <div style={styles.imagePlaceholder}>
-              <img src={product.img} alt={product.img} style={styles.image} />
-            </div>
-            <div style={styles.itemDetails}>
-              <p style={styles.productName}>{product.name}</p>
-              <p style={styles.productDetails}>Size: {product.size}</p>
+    <>
+      <NavBar />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Liked Items</h2>
+        {products.map((product, index) => {
+          return likeditems.includes(product._id) ? (
+            <div style={styles.likedItem} key={index}>
+              <div style={styles.imagePlaceholder}>
+                <img src={product.img} alt={product.img} style={styles.image} />
+              </div>
+              <div style={styles.itemDetails}>
+                <p style={styles.productName}>{product.name}</p>
+                <p style={styles.productDetails}>Size: {product.size}</p>
 
-              <p style={styles.productDetails}>
-                Available quantities: {product.available_quantity}
-              </p>
-              <p style={styles.productDetails}>
-                Price: ₹{product.cost_per_day}/day
-              </p>
+                <p style={styles.productDetails}>
+                  Available quantities: {product.available_quantity}
+                </p>
+                <p style={styles.productDetails}>
+                  Price: ₹{product.cost_per_day}/day
+                </p>
+              </div>
             </div>
-          </div>
-        ) : null; // Returning null when the product is not liked
-      })}
-    </div>
+          ) : null; // Returning null when the product is not liked
+        })}
+      </div>
+    </>
   );
 };
 
