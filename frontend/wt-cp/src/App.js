@@ -15,13 +15,8 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MyProducts from "./pages/myProducts";
 import SplashScreen from "./pages/SplashScreen";
-import CategoryPage from "./pages/CategoryPage";
 import UpdateProduct from "./pages/UpdateProduct";
-
 import ProductCard from "./components/ProductCard";
-import MenShopping from "./components/MenShopping";
-import KidsShopping from "./components/KidsShopping";
-import WomenShopping from "./components/WomenShopping";
 import ProtectedRoute from "./components/ProtectedRoutes";
 
 function App() {
@@ -30,14 +25,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route
-          path="/category"
-          element={
-            <ProtectedRoute>
-              <CategoryPage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/shopping"
           element={
@@ -59,30 +46,6 @@ function App() {
           element={
             <ProtectedRoute>
               <Cart />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/men"
-          element={
-            <ProtectedRoute>
-              <MenShopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/women"
-          element={
-            <ProtectedRoute>
-              <WomenShopping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/kids"
-          element={
-            <ProtectedRoute>
-              <KidsShopping />
             </ProtectedRoute>
           }
         />
