@@ -6,7 +6,7 @@ import NavBar from "../components/navBar";
 const Liked = () => {
   const price1 = 50; // price for product 1
   const [products, setProducts] = useState([]);
-  const [likeditems, setlikeditems] = useState([]);
+  const [likedItems, setlikedItems] = useState([]);
 
   useEffect(() => {
     const getData = async () => {
@@ -33,7 +33,7 @@ const Liked = () => {
             },
           }
         );
-        setlikeditems(response.data.data.user.likeditems);
+        setlikedItems(response.data.data.user.likedItems);
       } catch (error) {
         console.error("Error :", error);
       }
@@ -47,7 +47,7 @@ const Liked = () => {
       <div style={styles.container}>
         <h2 style={styles.heading}>Liked Items</h2>
         {products.map((product, index) => {
-          return likeditems.includes(product._id) ? (
+          return likedItems.includes(product._id) ? (
             <div style={styles.likedItem} key={index}>
               <div style={styles.imagePlaceholder}>
                 <img src={product.img} alt={product.img} style={styles.image} />

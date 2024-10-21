@@ -38,24 +38,60 @@ exports.Liked = catchAsync(async (req, res, next) => {
     }
 
     let updatedUser;
-    if (user.likeditems.includes(productId)) {
+    if (user.likedItems.includes(productId)) {
       // Remove liked product
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $pull: { likeditems: productId } },
+        { $pull: { likedItems: productId } },
         { new: true } // Return the updated document
       );
     } else {
       // Add liked product
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $addToSet: { likeditems: productId } }, // $addToSet prevents duplicates
+        { $addToSet: { likedItems: productId } }, // $addToSet prevents duplicates
         { new: true } // Return the updated document
       );
     }
 
     // Send the response with the updated liked items
-    return res.status(200).json({ likeditems: updatedUser.likeditems });
+    return res.status(200).json({ likedItems: updatedUser.likedItems });
+  } catch (error) {
+    return next(error); // Pass error to the next middleware
+  }
+});
+
+// Handle Cart Items
+exports.cart = catchAsync(async (req, res, next) => {
+  const userId = req.params.id;
+  const productId = req.body.productId;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let updatedUser;
+    if (user.cartitems.includes(productId)) {
+      // Remove product from cart
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { cartitems: productId } },
+        { new: true } // Return the updated document
+      );
+    } else {
+      // Add product to cart
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { cartitems: productId } }, // $addToSet prevents duplicates
+        { new: true } // Return the updated document
+      );
+    }
+
+    // Send the response with the updated cart items
+    return res.status(200).json({ cartitems: updatedUser.cartitems });
   } catch (error) {
     return next(error); // Pass error to the next middleware
   }

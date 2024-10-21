@@ -49,6 +49,10 @@ const userSchema = mongoose.Schema({
     type: [String],
   },
 
+  cartitems: {
+    type: [String],
+  },
+
   passwordChangedAt: Date,
 });
 

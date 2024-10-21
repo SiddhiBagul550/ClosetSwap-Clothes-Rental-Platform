@@ -15,6 +15,7 @@ import {
 function App() {
   const [products, setProducts] = useState([]);
   const [likeditems, setlikeditems] = useState([]);
+  const [cartitems, setCartitems] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const location = useLocation();
@@ -61,6 +62,7 @@ function App() {
           }
         );
         setlikeditems(response.data.data.user.likeditems);
+        setCartitems(response.data.data.user.cartitems);
       } catch (error) {
         console.error("Error :", error);
       }
@@ -90,6 +92,35 @@ function App() {
           return prevLiked.filter((id) => id !== productId); // Remove if already liked
         } else {
           return [...prevLiked, productId]; // Add to liked
+        }
+      });
+    } catch (error) {
+      console.error("Error updating like status:", error);
+    }
+  };
+
+  const addCartAndRemoveCart = async (e) => {
+    const productId = e.currentTarget.getAttribute("data-id");
+
+    // Now make the API call to reflect the change on the server
+    try {
+      await axios.post(
+        `http://127.0.0.1:3001/api/v1/users/cart/${localStorage.userId}`,
+        {
+          productId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.jwtToken}`,
+          },
+        }
+      );
+      // Optimistically update the liked items before the API call
+      setCartitems((prevCart) => {
+        if (prevCart.includes(productId)) {
+          return prevCart.filter((id) => id !== productId); // Remove if already liked
+        } else {
+          return [...prevCart, productId]; // Add to liked
         }
       });
     } catch (error) {
@@ -214,8 +245,19 @@ function App() {
                   <span>
                     <FontAwesomeIcon icon={faLink} />
                   </span>
-                  <span>
-                    <FontAwesomeIcon icon={faCartShopping} />
+                  <span data-id={product._id} onClick={addCartAndRemoveCart}>
+                    <FontAwesomeIcon
+                      icon={
+                        cartitems.includes(product._id)
+                          ? faCartShopping
+                          : faCartShopping
+                      }
+                      style={{
+                        color: cartitems.includes(product._id)
+                          ? "green"
+                          : "black",
+                      }}
+                    />
                   </span>
                 </div>
               </div>

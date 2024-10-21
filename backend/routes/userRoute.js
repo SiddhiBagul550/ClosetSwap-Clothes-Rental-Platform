@@ -12,5 +12,6 @@ router.route("/:id").get(authController.protect, userController.getUser);
 
 router.route("/verify").get(authController.verfiyCheck);
 router.route("/like/:id").post(authController.protect, userController.Liked);
+router.route("/cart/:id").post(authController.protect, userController.cart);
 
 module.exports = router;
