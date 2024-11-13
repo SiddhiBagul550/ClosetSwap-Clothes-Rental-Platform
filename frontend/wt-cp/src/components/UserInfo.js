@@ -35,9 +35,9 @@ export default function UserInfo() {
   return (
     <div className="profile-section">
       <div className="profile-details">
-        <p className="username">{userData.username}</p>
+        <p className="username">Welcome! {userData.username}</p>
         <br />
-        <p>Email: {userData.email}</p>
+        <p>{userData.email}</p>
         <br />
         {/* <p>Member since: Jan 2021</p>
         <br />

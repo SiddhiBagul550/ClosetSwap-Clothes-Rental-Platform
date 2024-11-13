@@ -44,7 +44,13 @@ function App() {
             Authorization: `Bearer ${localStorage.jwtToken}`,
           },
         });
-        setProducts(response.data.data.products);
+        let data = [];
+        response.data.data.products.forEach((element) => {
+          if (element.available_quantity > 0) {
+            data.push(element);
+          }
+        });
+        setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -242,9 +248,9 @@ function App() {
                       }}
                     />
                   </span>
-                  <span>
+                  {/* <span>
                     <FontAwesomeIcon icon={faLink} />
-                  </span>
+                  </span> */}
                   <span data-id={product._id} onClick={addCartAndRemoveCart}>
                     <FontAwesomeIcon
                       icon={
