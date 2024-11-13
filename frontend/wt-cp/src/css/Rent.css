@@ -8,9 +8,9 @@
     max-width: 600px;
     margin: 50px auto;
     padding: 20px;
-    background-color: #ffe6f7;
+    background-color: #cde2e6;
     border-radius: 10px;
-    border: 2px solid #f5bfd7;
+    border: 2px solid #a8d8d3;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-family: Arial, sans-serif;
   }
@@ -42,8 +42,8 @@
   
   button {
     padding: 10px;
-    background-color: #b3ffba;
-    color: white;
+    background-color: #2E8B57;
+    color: black;
     border: none;
     border-radius: 5px;
     font-size: 1rem;

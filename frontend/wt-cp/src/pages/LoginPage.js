@@ -151,7 +151,7 @@ const styles = {
   button: {
     padding: "10px",
     marginTop: "10px",
-    backgroundColor: "#FFD3B4", // pastel peach
+    backgroundColor: "#779ECB", // pastel peach
     color: "#4A4A4A",
     border: "none",
     borderRadius: "8px",
