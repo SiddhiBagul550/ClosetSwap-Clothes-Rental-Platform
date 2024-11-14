@@ -17,7 +17,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #acd1cb; /* Nav Bar Color */
+  background-color: #acd1cb;
 }
 
 .search-bar {
@@ -46,11 +46,11 @@
 .top-bar-icons {
   display: flex;
   align-items: center;
-  gap: 20px; /* Added spacing between icons */
+  gap: 20px;
 }
 
 .rent-button {
-  background-color: #a8d8d3; /* Soft Blue */
+  background-color: #a8d8d3;
   color: black;
   padding: 10px;
   border-radius: 10px;
@@ -77,18 +77,18 @@
 }
 
 .filter-section {
-  background-color: #cde2e6; /* Light Gray for filters */
+  background-color: #cde2e6;
   padding: 10px;
-  width: 250px; /* Set width for vertical column */
+  width: 250px;
 }
 
 .filter-group {
-  margin-bottom: 20px; /* Space between each filter group */
+  margin-bottom: 20px;
 }
 
 .filter-group label {
   display: block;
-  margin-top: 10px; /* Space between checkboxes */
+  margin-top: 10px;
 }
 
 .product-grid {
@@ -97,7 +97,6 @@
   gap: 12px;
   padding: 10px;
   flex: 1;
-
   height: calc(100vh - 100px);
   overflow-y: auto;
 }
