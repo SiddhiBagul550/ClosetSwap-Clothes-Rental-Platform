@@ -137,7 +137,7 @@ const FormPage = () => {
           value={formData.available_quantity}
           onChange={handleChange}
           required
-          min = "1"
+          min="1"
         />
 
         {/* Size */}
@@ -158,7 +158,7 @@ const FormPage = () => {
           value={formData.cost_per_day}
           onChange={handleChange}
           required
-          min = "1"
+          min="1"
         />
 
         <label>Product description</label>

@@ -245,3 +245,68 @@
 .margin {
   margin: 25px 10px 10px 10px;
 }
+
+/* Shopping.css */
+
+/* Ensure the navbar stays above the filter section */
+.navbar {
+  position: relative;
+  z-index: 10; /* Make sure navbar is above the filter */
+}
+
+/* Container for main content */
+.app-container {
+  display: flex;
+}
+
+/* Main content area */
+.main-content {
+  display: flex;
+  position: relative;
+  width: 100%;
+  padding-top: 50px; /* Adjust space for navbar */
+}
+
+/* Filter icon on the left */
+.filter-icon {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  cursor: pointer;
+  z-index: 15; /* Ensure it's above other elements */
+}
+
+/* Filter section */
+.filter-section {
+  width: 300px;
+  height: 100%;
+  background-color: #f4f4f4;
+  position: fixed;
+  top: 50px; /* Push the filter below the navbar */
+  left: -300px; /* Initially off-screen to the left */
+  transition: left 0.3s ease-in-out;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  z-index: 5; /* Make sure filter stays behind the navbar */
+}
+
+.filter-section.open {
+  left: 0; /* Move into view */
+}
+
+.product-grid {
+  margin-left: 0; /* Adjust layout if needed */
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.product-grid.with-filter {
+  margin-left: 300px; /* Adjust space when filter is visible */
+}
+
+.product-card {
+  background-color: #fff;
+  border-radius: 8px;
+  margin: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
