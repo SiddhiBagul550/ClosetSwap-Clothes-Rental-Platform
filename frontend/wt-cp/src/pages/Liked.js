@@ -33,7 +33,7 @@ const Liked = () => {
             },
           }
         );
-        setlikedItems(response.data.data.user.likedItems);
+        setlikedItems(response.data.data.user.likeditems);
       } catch (error) {
         console.error("Error :", error);
       }
@@ -46,6 +46,7 @@ const Liked = () => {
       <NavBar />
       <div style={styles.container}>
         <h2 style={styles.heading}>Liked Items</h2>
+        {products.length === 0 ? <h2>No data available....</h2> : ""}
         {products.map((product, index) => {
           return likedItems.includes(product._id) ? (
             <div style={styles.likedItem} key={index}>
