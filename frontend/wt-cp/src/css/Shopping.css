@@ -73,13 +73,13 @@
 .main-content {
   display: flex;
   padding: 10px;
-  height: 100%;
+  height: 86vh;
 }
 
 .filter-section {
   background-color: #cde2e6;
   padding: 10px;
-  width: 250px;
+  width: 210px;
 }
 
 .filter-group {
@@ -95,8 +95,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding: 10px;
+  padding: 10px 10px 80px 10px;
+  /* margin: 10px 0 60px 0; */
   flex: 1;
+  /* height: 100%; */
   height: calc(100vh - 100px);
   overflow-y: auto;
 }
@@ -150,6 +152,7 @@
   width: 250px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: white;
+  z-index: 5;
 }
 
 .profile-details {
@@ -259,6 +262,7 @@
 /* Container for main content */
 .app-container {
   display: flex;
+  overflow: hidden;
 }
 
 /* Main content area */
@@ -266,7 +270,7 @@
   display: flex;
   position: relative;
   width: 100%;
-  padding-top: 50px; /* Adjust space for navbar */
+  padding-top: 20px; /* Adjust space for navbar */
 }
 
 /* Filter icon on the left */
@@ -281,15 +285,15 @@
 /* Filter section */
 .filter-section {
   width: 300px;
-  height: 100%;
+  height: 100vh;
   background-color: #f4f4f4;
   position: fixed;
-  top: 50px; /* Push the filter below the navbar */
-  left: -300px; /* Initially off-screen to the left */
+  top: 100px;
+  left: -300px;
   transition: left 0.3s ease-in-out;
-  padding: 20px;
+  padding: 35px 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-  z-index: 5; /* Make sure filter stays behind the navbar */
+  z-index: 0;
 }
 
 .filter-section.open {

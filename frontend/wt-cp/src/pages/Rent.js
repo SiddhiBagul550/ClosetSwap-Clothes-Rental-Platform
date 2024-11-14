@@ -3,7 +3,7 @@ import "../css/Rent.css";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navBar";
 import axios from "axios";
-import NavBar from "../components/navBar";
+// import NavBar from "../components/navBar";
 
 function convert(file) {
   return new Promise((resolve, reject) => {
