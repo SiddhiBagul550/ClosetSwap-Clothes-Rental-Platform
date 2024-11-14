@@ -10,6 +10,7 @@ import {
   faLink,
   faCartShopping,
   faFilter,
+  faBars // Hamburger icon
 } from "@fortawesome/free-solid-svg-icons";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
   const [cartitems, setCartitems] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false); // State to manage filter visibility
   const location = useLocation();
 
   const buildURL = () => {
@@ -79,7 +81,6 @@ function App() {
   const likeAndUnlike = async (e) => {
     const productId = e.currentTarget.getAttribute("data-id");
 
-    // Now make the API call to reflect the change on the server
     try {
       await axios.post(
         `http://127.0.0.1:3001/api/v1/users/like/${localStorage.userId}`,
@@ -92,12 +93,11 @@ function App() {
           },
         }
       );
-      // Optimistically update the liked items before the API call
       setlikeditems((prevLiked) => {
         if (prevLiked.includes(productId)) {
-          return prevLiked.filter((id) => id !== productId); // Remove if already liked
+          return prevLiked.filter((id) => id !== productId); 
         } else {
-          return [...prevLiked, productId]; // Add to liked
+          return [...prevLiked, productId]; 
         }
       });
     } catch (error) {
@@ -108,7 +108,6 @@ function App() {
   const addCartAndRemoveCart = async (e) => {
     const productId = e.currentTarget.getAttribute("data-id");
 
-    // Now make the API call to reflect the change on the server
     try {
       await axios.post(
         `http://127.0.0.1:3001/api/v1/users/cart/${localStorage.userId}`,
@@ -121,12 +120,11 @@ function App() {
           },
         }
       );
-      // Optimistically update the liked items before the API call
       setCartitems((prevCart) => {
         if (prevCart.includes(productId)) {
-          return prevCart.filter((id) => id !== productId); // Remove if already liked
+          return prevCart.filter((id) => id !== productId); 
         } else {
-          return [...prevCart, productId]; // Add to liked
+          return [...prevCart, productId]; 
         }
       });
     } catch (error) {
@@ -136,7 +134,6 @@ function App() {
 
   const categoryHandler = (e) => {
     const { value, checked } = e.target;
-
     if (checked) {
       setSelectedCategories((prev) => [...prev, value]);
     } else {
@@ -145,9 +142,9 @@ function App() {
       );
     }
   };
+
   const subCategoryHandler = (e) => {
     const { value, checked } = e.target;
-
     if (checked) {
       setSelectedSubCategories((prev) => [...prev, value]);
     } else {
@@ -159,15 +156,14 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Top Bar */}
       <NavBar />
-      {/* Main content with filters and product grid */}
       <div className="main-content">
-        {/* Filter section */}
-        <aside className="filter-section">
+        <div className="filter-icon" onClick={() => setFilterOpen(!filterOpen)}>
+          <FontAwesomeIcon icon={faBars} size="lg" />
+        </div>
+
+        <div className={`filter-section ${filterOpen ? 'open' : ''}`}>
           <h3>Filters</h3>
-          <br />
-          <br />
           <div className="filter-group">
             <h4>Category</h4>
             <label>
@@ -219,11 +215,9 @@ function App() {
               Accessories
             </label>
           </div>
-        </aside>
+        </div>
 
-        {/* Product grid */}
-        <div className="product-grid">
-          {products.length === 0 ? <h2>No data available....</h2> : ""}
+        <div className={`product-grid ${filterOpen ? 'with-filter' : ''}`}>
           {products.map((product, index) => (
             <div className="product-link" key={index}>
               <div className="product-card">
@@ -239,30 +233,17 @@ function App() {
                 <div className="row">
                   <span data-id={product._id} onClick={likeAndUnlike}>
                     <FontAwesomeIcon
-                      icon={
-                        likeditems.includes(product._id) ? fasHeart : farHeart
-                      }
+                      icon={likeditems.includes(product._id) ? fasHeart : farHeart}
                       style={{
-                        color: likeditems.includes(product._id)
-                          ? "red"
-                          : "black",
+                        color: likeditems.includes(product._id) ? "red" : "black",
                       }}
                     />
                   </span>
-                  {/* <span>
-                    <FontAwesomeIcon icon={faLink} />
-                  </span> */}
                   <span data-id={product._id} onClick={addCartAndRemoveCart}>
                     <FontAwesomeIcon
-                      icon={
-                        cartitems.includes(product._id)
-                          ? faCartShopping
-                          : faCartShopping
-                      }
+                      icon={faCartShopping}
                       style={{
-                        color: cartitems.includes(product._id)
-                          ? "green"
-                          : "black",
+                        color: cartitems.includes(product._id) ? "green" : "black",
                       }}
                     />
                   </span>

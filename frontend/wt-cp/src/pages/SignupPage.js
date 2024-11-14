@@ -1,68 +1,67 @@
 import axios from "axios";
-import img from "../assets/ClosetSwapNew.png"; // Image for the left side
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import img from "../assets/ClosetSwapNew.png"; // Image for the left side
+import back from "../assets/back1.jpg"; // Background image
 
 const SignupPage = () => {
-  const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [username, setUsername] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [isSignedUp, setIsSignedUp] = useState(false); // Animation state
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (username && email && password && passwordConfirm) {
+    if (email && password && passwordConfirm && username) {
       try {
         const response = await axios.post(
           "http://localhost:3001/api/v1/users/signup",
           {
-            username,
             email,
             password,
             passwordConfirm,
+            username,
             contactNumber,
             address,
           }
         );
+
         if (response.status === 201) {
           alert("Signup successful");
-          navigate("/login");
+          setIsSignedUp(true); // Trigger exit animation
+
+          // Delay navigation to allow animation to complete
+          setTimeout(() => navigate("/login"), 600);
         } else {
           alert("Signup failed, please try again.");
         }
       } catch (error) {
-        console.error("Error during signup:", error);
         alert("Error during signup. Please try again.");
       }
     } else {
-      alert("Please fill out all fields");
+      alert("Please fill out all fields.");
     }
   };
 
   return (
     <div style={styles.container}>
-      {/* Left Side with Image and Description */}
-      <div style={styles.leftSide}>
-        <img src={img} alt="Closet Swap" style={styles.image} />
-        <p style={styles.description}>
-          Join ClosetSwap: Your go-to e-rental store for fashion, accessories,
-          and more. Sign up today!
-        </p>
-      </div>
-
-      {/* Right Side with Signup Form */}
-      <div style={styles.rightSide}>
-        <div style={styles.formContainer}>
+      <div style={styles.background} />
+      <div style={styles.foreground}>
+        <div
+          style={styles.signupBox}
+          className={isSignedUp ? "exit" : ""} // Apply exit animation after signup
+        >
           <h2 style={styles.heading}>Create Account for ClosetSwap</h2>
           <form onSubmit={handleSignup} style={styles.form}>
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Username"
               value={username}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               style={styles.inputBlue}
             />
             <input
@@ -87,7 +86,7 @@ const SignupPage = () => {
               style={styles.inputBlue}
             />
             <input
-              type="number"
+              type="text"
               placeholder="Contact Number"
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
@@ -118,53 +117,44 @@ const SignupPage = () => {
 
 const styles = {
   container: {
-    display: "flex",
-    flexDirection: "row", // Two-column layout
-    justifyContent: "space-between",
-    alignItems: "center",
+    position: "relative",
+    width: "100%",
     height: "100vh",
-    backgroundColor: "#F2F6FF", // light pastel blue
-  },
-  leftSide: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "40px",
-    height: "100%",
-    backgroundColor: "#ACD1CB", // Solid mint color for the left side
-  },
-
-  image: {
-    width: "80%",
-    height: "auto",
-    marginBottom: "20px",
-  },
-  description: {
-    fontSize: "18px",
-    color: "#4A4A4A",
-    textAlign: "center",
-    maxWidth: "300px",
-  },
-  rightSide: {
-    flex: 1,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100%",
-    background: "linear-gradient(to right, #ACD1CB, #FFFFFF)", // Gradient from mint to white
+    overflow: "hidden",
   },
-  formContainer: {
-    backgroundColor: "#ffffff", // White box for the signup
+  background: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url(${back})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    filter: "blur(2px)",
+    zIndex: 0,
+  },
+  foreground: {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signupBox: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: "40px",
-    borderRadius: "20px", // Rounded edges
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Soft shadow for the rounded box
+    borderRadius: "20px",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
     width: "350px",
     textAlign: "center",
+    transition: "transform 0.6s ease", // Smooth exit transition
   },
   heading: {
-    color: "#6B728E", // muted pastel purple
+    color: "#6B728E",
     marginBottom: "20px",
     fontSize: "24px",
   },
@@ -176,17 +166,17 @@ const styles = {
     padding: "10px",
     margin: "10px 0",
     borderRadius: "8px",
-    border: "1px solid #B0C4DE", // pastel blue border
+    border: "1px solid #B0C4DE",
     fontSize: "16px",
-    backgroundColor: "#E0F7FA", // soft pastel blue background
+    backgroundColor: "#E0F7FA",
     color: "#4A4A4A",
   },
   button: {
     padding: "10px",
     marginTop: "10px",
-    backgroundColor: "#FFD3B4", // pastel peach
+    backgroundColor: "#ffcbc4",
+    border: "1px solid #cc9696",
     color: "#4A4A4A",
-    border: "none",
     borderRadius: "8px",
     cursor: "pointer",
     fontSize: "16px",
@@ -197,10 +187,27 @@ const styles = {
     marginTop: "10px",
   },
   link: {
-    color: "#91A7FF", // pastel blue
+    color: "#91A7FF",
     cursor: "pointer",
     textDecoration: "underline",
   },
 };
+
+// CSS-in-JS for animations
+const customStyles = document.createElement("style");
+customStyles.innerHTML = `
+  .exit {
+    transform: translateY(100vh); // Move box downwards on successful signup
+  }
+  .animateInput:focus {
+    border-color: #91A7FF; // Change border color on focus
+    transition: border-color 0.3s ease;
+  }
+  .animateButton:hover {
+    background-color: #ffc1b2; // Lighter shade on hover
+    transition: background-color 0.3s ease;
+  }
+`;
+document.head.appendChild(customStyles);
 
 export default SignupPage;

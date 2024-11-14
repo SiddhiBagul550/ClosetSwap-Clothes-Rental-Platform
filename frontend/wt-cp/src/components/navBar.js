@@ -18,15 +18,21 @@ export default function NavBar() {
   return (
     <header className="header">
       <Link to={"/shopping"}>
-        <img
-          src={logo}
-          alt="Closet Swap"
-          style={{
-            height: "7vh",
-            width: "10vw",
-            objectFit: "contain",
-          }}
-        />
+      <img
+  src={logo}
+  alt="Closet Swap"
+  style={{
+    height: "10vh", 
+    width: "10vh", 
+    objectFit: "contain",
+    border: "2.5px solid #ffffff", // White border for prominence
+    borderRadius: "50%", // Circular border
+    zIndex: 1,
+    transition: "transform 2.5s ease, opacity 1s ease", // Smooth scaling and fade-in
+    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.3)", // Shadow for depth
+  }}
+/>
+
       </Link>
       {/* <div className="search-bar">
         <input type="text" placeholder="Search for products" />
