@@ -223,6 +223,7 @@ function App() {
 
         {/* Product grid */}
         <div className="product-grid">
+          {products.length === 0 ? <h2>No data available....</h2> : ""}
           {products.map((product, index) => (
             <div className="product-link" key={index}>
               <div className="product-card">

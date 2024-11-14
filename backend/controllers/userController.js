@@ -38,24 +38,27 @@ exports.Liked = catchAsync(async (req, res, next) => {
     }
 
     let updatedUser;
-    if (user.likedItems.includes(productId)) {
+    console.log("--------------------------------------------1");
+    console.log(user);
+
+    if (user.likeditems.includes(productId)) {
       // Remove liked product
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $pull: { likedItems: productId } },
+        { $pull: { likeditems: productId } },
         { new: true } // Return the updated document
       );
     } else {
       // Add liked product
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $addToSet: { likedItems: productId } }, // $addToSet prevents duplicates
+        { $addToSet: { likeditems: productId } }, // $addToSet prevents duplicates
         { new: true } // Return the updated document
       );
     }
 
     // Send the response with the updated liked items
-    return res.status(200).json({ likedItems: updatedUser.likedItems });
+    return res.status(200).json({ likeditems: updatedUser.likeditems });
   } catch (error) {
     return next(error); // Pass error to the next middleware
   }

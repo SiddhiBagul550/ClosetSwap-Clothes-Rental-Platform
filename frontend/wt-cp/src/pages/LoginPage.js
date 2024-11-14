@@ -85,12 +85,13 @@ const LoginPage = () => {
 
 const styles = {
   container: {
+    backgroundImage: "url(../assets/img1.png)",
     display: "flex",
     flexDirection: "row", // Two-column layout
     justifyContent: "space-between",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#F2F6FF", // light pastel blue
+    // backgroundColor: "#F2F6FF", // light pastel blue
   },
   leftSide: {
     flex: 1,
