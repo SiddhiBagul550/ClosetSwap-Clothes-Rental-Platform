@@ -1,4 +1,4 @@
-#👚 RentIt — Clothes Rental Platform
+# RentIt — Clothes Rental Platform 👚 
 
 **RentIt** is a full-stack MERN (MongoDB, Express, React, Node.js) web application designed for renting clothes, footwear, accessories, and costumes. It allows users to easily list their wardrobe items for rent or rent outfits from others at daily rates.
 
