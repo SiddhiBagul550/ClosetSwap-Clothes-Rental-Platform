@@ -8,9 +8,19 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
+const allowedOrigins = [
+  /^http:\/\/localhost:\d+$/, // any localhost port, for local dev
+  ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+];
+
 app.use(
   cors({
-    origin: /^http:\/\/localhost:\d+$/, // Any localhost port, for local dev
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.some((allowed) => (allowed instanceof RegExp ? allowed.test(origin) : allowed === origin))) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true, // Allow credentials (cookies)
   })
 );

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" width="340" height="90" font-family="Karla, sans-serif">
+  <style>
+    .wm { font-family: Fraunces, Georgia, serif; font-weight: 400; letter-spacing: -.01em; }
+    .tag { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; fill: #918C9C; }
+  </style>
+
+  <symbol id="mark" viewBox="0 0 64 64">
+    <path d="M32 26 L14.5 46.5 Q12.5 49.5 16 49.5 L48 49.5 Q51.5 49.5 49.5 46.5 Z"
+          fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M32 26 L32 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M32 21 A6 6 0 1 0 27.2 11.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M23.2 13.2 L27.4 11.3 L29.0 7.4" fill="none" stroke="currentColor" stroke-width="2.6"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+
+  <g color="#211E2B">
+    <use href="#mark" width="62" height="62" y="4"/>
+  </g>
+  <text class="wm" x="80" y="52" font-size="40" fill="#211E2B">Closet<tspan fill="#D99BAE">·</tspan>Swap</text>
+  <text class="tag" x="82" y="72">A rental wardrobe · Pune</text>
+</svg>
