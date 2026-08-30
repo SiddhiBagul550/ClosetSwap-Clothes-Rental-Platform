@@ -1,11 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaHeart, FaShareAlt, FaShoppingCart } from "react-icons/fa";
-import { useParams } from "react-router-dom"; // Import useParams to access dynamic route
 import NavBar from "./navBar";
+import "../css/ProductDetail.css";
 
 const ProductCard = () => {
-  const { productId } = useParams(); // Access the product ID from the route
   const [productInfo, setProductInfo] = useState("");
 
   useEffect(() => {
@@ -35,135 +34,42 @@ const ProductCard = () => {
   return (
     <>
       <NavBar />
-      <div style={styles.cardContainer}>
-        {/* Image placeholder */}
-        <div style={styles.imageContainer}>
-          <img style={styles.img} src={productInfo.img} alt="Img here" />
-          <div style={styles.iconContainer}>
-            <FaHeart style={styles.icon} />
-            <FaShareAlt style={styles.icon} />
-            <FaShoppingCart style={styles.icon} />
+      <div className="detail-wrap">
+        <div className="detail-card">
+          <div className="detail-image">
+            <img src={productInfo.img} alt={productInfo.name || "Product"} />
+            <div className="detail-icon-row">
+              <button className="icon-btn" aria-label="Like">
+                <FaHeart color="#f97fa8" />
+              </button>
+              <button className="icon-btn" aria-label="Share">
+                <FaShareAlt color="#ad97ff" />
+              </button>
+              <button className="icon-btn" aria-label="Add to cart">
+                <FaShoppingCart color="#7ad8b4" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Product Information */}
-        <div style={styles.productInfo}>
-          <p style={styles.productName}>
-            {productInfo.name} {productId}
-          </p>
-          <p style={styles.price}>Price: ₹ {productInfo.cost_per_day} /day</p>
-          <p style={styles.price}>Size: {productInfo.size}</p>
-          <p style={styles.price}>Category: {productInfo.category}</p>
-        </div>
+          <p className="detail-name">{productInfo.name}</p>
+          <p className="detail-price">₹ {productInfo.cost_per_day} / day</p>
 
-        {/* Description */}
-        <div style={styles.descriptionBox}>
-          <p>{productInfo.product_description}</p>{" "}
-          {/* Dynamic product description */}
-        </div>
+          <div className="detail-chips">
+            {productInfo.size && <span className="chip">Size: {productInfo.size}</span>}
+            {productInfo.category && (
+              <span className="chip chip-mint">{productInfo.category}</span>
+            )}
+          </div>
 
-        {/* Contact Owner Button */}
-        <div style={styles.contactButtonContainer}>
-          <button style={styles.contactButton}>
-            <span style={styles.buttonIcon}></span> Contact Owner
-          </button>
+          <div className="detail-description">
+            {productInfo.product_description || "No description provided."}
+          </div>
+
+          <button className="btn btn-primary btn-block">Contact Owner</button>
         </div>
       </div>
     </>
   );
-};
-
-const styles = {
-  cardContainer: {
-    width: "90vw", // Responsive width
-    maxWidth: "400px", // Limit max width on larger screens
-    padding: "20px",
-    backgroundColor: "#fff",
-    borderRadius: "20px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    backgroundColor: "#e6f7f2" /* Theme color can be updated here */,
-    border: "2px solid #acd1cb",
-    margin: "20px auto",
-  },
-  imageContainer: {
-    width: "100%",
-    height: "200px",
-    backgroundColor: "#DADADA", // Image placeholder color
-    borderRadius: "15px",
-    position: "relative",
-    marginBottom: "15px",
-    display: "flex",
-    justifyContent: "center",
-  },
-  iconContainer: {
-    position: "absolute",
-    bottom: "10px",
-    left: "10px",
-    display: "flex",
-    gap: "10px",
-  },
-  icon: {
-    fontSize: "16px",
-    color: "#6B728E",
-  },
-  productInfo: {
-    width: "100%",
-    textAlign: "left",
-    marginBottom: "15px",
-  },
-  productName: {
-    fontWeight: "bold",
-    fontSize: "1.2rem",
-    color: "#4A4A4A",
-  },
-  price: {
-    fontSize: "1rem",
-    color: "#4A4A4A",
-  },
-  descriptionBox: {
-    width: "100%",
-    backgroundColor: "#DADADA",
-    padding: "15px",
-    borderRadius: "10px",
-    textAlign: "center",
-    color: "#4A4A4A",
-    marginBottom: "20px",
-    fontSize: "1rem",
-  },
-  contactButtonContainer: {
-    width: "100%",
-  },
-  contactButton: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    padding: "12px",
-    backgroundColor: "#DADADA",
-    color: "#4A4A4A",
-    borderRadius: "10px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "1rem",
-    transition: "background-color 0.3s",
-  },
-  buttonIcon: {
-    width: "15px",
-    height: "15px",
-    backgroundColor: "#6B728E",
-    borderRadius: "50%",
-    marginRight: "10px",
-  },
-  img: {
-    maxWidthidth:
-      "100%" /* Ensures the image does not exceed the width of the placeholder */,
-    maxHeight:
-      "100%" /* Ensures the image does not exceed the height of the placeholder */,
-    objectFit: "cover",
-  },
 };
 
 export default ProductCard;

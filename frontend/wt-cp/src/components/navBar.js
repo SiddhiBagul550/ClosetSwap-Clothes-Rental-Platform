@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import logo from "../assets/ClosetSwapNew.png";
 import UserInfo from "./UserInfo";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import "../css/NavBar.css";
+import { isAuthenticated } from "./ProtectedRoutes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faShoppingCart,
@@ -12,49 +14,47 @@ import {
 
 export default function NavBar() {
   const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   const toggleProfile = () => {
+    if (!isAuthenticated()) {
+      navigate("/login");
+      return;
+    }
     setShowProfile(!showProfile);
   };
+  const isActive = (path) => location.pathname.startsWith(path);
   return (
     <header className="header">
-      <Link to={"/shopping"}>
-      <img
-  src={logo}
-  alt="Closet Swap"
-  style={{
-    height: "10vh", 
-    width: "10vh", 
-    objectFit: "contain",
-    border: "2.5px solid #ffffff", // White border for prominence
-    borderRadius: "50%", // Circular border
-    zIndex: 1,
-    transition: "transform 2.5s ease, opacity 1s ease", // Smooth scaling and fade-in
-    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.3)", // Shadow for depth
-  }}
-/>
-
+      <Link to={"/shopping"} className="brand-link">
+        <img src={logo} alt="Closet Swap" className="brand-logo" />
       </Link>
-      {/* <div className="search-bar">
-        <input type="text" placeholder="Search for products" />
-        <button className="voice-icon">🎤</button>
-      </div> */}
+
       <div className="top-bar-icons">
         <Link to="/rent" className="rent-button">
           <FontAwesomeIcon icon={faPlus} /> Rent
         </Link>
-        <Link to="/liked-items" className="top-icon">
-          <FontAwesomeIcon icon={faHeart} style={{ color: "red" }} /> Liked
-          Items
+        <Link
+          to="/liked-items"
+          className={`top-icon ${isActive("/liked-items") ? "active" : ""}`}
+        >
+          <FontAwesomeIcon icon={faHeart} style={{ color: "var(--accent-deep)" }} />
+          <span className="nav-label">Liked</span>
         </Link>
-        <Link to="/cart" className="top-icon">
-          <FontAwesomeIcon icon={faShoppingCart} /> Cart
+        <Link to="/cart" className={`top-icon ${isActive("/cart") ? "active" : ""}`}>
+          <FontAwesomeIcon icon={faShoppingCart} />
+          <span className="nav-label">Cart</span>
         </Link>
-        <div className="profile-icon" onClick={toggleProfile}>
-          <FontAwesomeIcon icon={faUser} /> Profile
+        <div
+          className={`profile-icon ${showProfile ? "active" : ""}`}
+          onClick={toggleProfile}
+        >
+          <FontAwesomeIcon icon={faUser} />
+          <span className="nav-label">{isAuthenticated() ? "Profile" : "Login"}</span>
         </div>
       </div>
       {/* Profile section */}
-      {showProfile && <UserInfo />}
+      {showProfile && isAuthenticated() && <UserInfo />}
     </header>
   );
 }

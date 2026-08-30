@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../css/Shopping.css";
+import "../css/NavBar.css";
 
 export default function UserInfo() {
   const navigate = useNavigate();
@@ -32,31 +32,27 @@ export default function UserInfo() {
     window.location.reload();
   };
 
+  const initial = userData.username ? userData.username.charAt(0).toUpperCase() : "?";
+
   return (
     <div className="profile-section">
       <div className="profile-details">
-        <p className="username">Welcome! {userData.username}</p>
-        <br />
-        <p>{userData.email}</p>
-        <br />
-        {/* <p>Member since: Jan 2021</p>
-        <br />
-        <p>Total Orders: 25</p>
-        <br />
-        <p>Items Added to Rent: 5</p>
-        <br /> */}
+        <div className="profile-avatar">{initial}</div>
+        <span className="username">Welcome, {userData.username}!</span>
+        <span className="profile-email">{userData.email}</span>
+
         <button
           className="switch-account"
           onClick={() => navigate("/myProducts")}
         >
-          My Products
+          🧺 My Products
         </button>
 
         <button className="switch-account" onClick={() => navigate("/login")}>
-          Switch Account
+          🔁 Switch Account
         </button>
-        <button className="switch-account" onClick={logOut}>
-          Log Out
+        <button className="switch-account danger" onClick={logOut}>
+          🚪 Log Out
         </button>
       </div>
     </div>

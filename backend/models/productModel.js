@@ -21,7 +21,33 @@ const productSchema = new mongoose.Schema({
 
   sub_category: {
     type: String, // Ensure `type` is defined for category
-    enum: ["Clothing", "Accessories", "Footwear", "Costumes"], // Enum for categories
+    enum: [
+      // Women
+      "Saree",
+      "Lehenga",
+      "Anarkali",
+      "Kurta Set",
+      "Indo-Western",
+      "Gown",
+      "Cocktail Dress",
+      "Co-ord Set",
+      // Men
+      "Sherwani",
+      "Bandhgala",
+      "Nehru Jacket",
+      "Dhoti Set",
+      "Suit",
+      "Blazer",
+      // Kids
+      "Lehenga Set",
+      "Dhoti Kurta",
+      "Tuxedo Set",
+      "Birthday Outfit",
+      // Cross-audience
+      "Accessories",
+      "Footwear",
+      "Costumes",
+    ], // Kept in sync by hand with frontend/wt-cp/src/constants/garmentTypes.js
     required: [true, "Please select the sub-category"],
   },
 

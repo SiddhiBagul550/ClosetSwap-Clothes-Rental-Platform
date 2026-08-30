@@ -3,7 +3,7 @@ import "../css/Rent.css";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navBar";
 import axios from "axios";
-// import NavBar from "../components/navBar";
+import { GARMENT_TYPES_BY_CATEGORY } from "../constants/garmentTypes";
 
 function convert(file) {
   return new Promise((resolve, reject) => {
@@ -39,10 +39,13 @@ const FormPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+      // The garment list depends on the audience, so a stale sub-category
+      // from the previous category can't stick around.
+      ...(name === "category" ? { sub_category: "" } : {}),
+    }));
   };
 
   const validateData = () => {
@@ -61,7 +64,7 @@ const FormPage = () => {
     }
     console.log({ ...formData, img: img, owner: localStorage.userId });
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://127.0.0.1:3001/api/v1/products/",
         { ...formData, img: img, owner: localStorage.userId },
         {
@@ -80,101 +83,132 @@ const FormPage = () => {
   return (
     <>
       <NavBar />
-      <div className="form-container">
-        <h2>Upload Product Details</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Name */}
-          <label>Product Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+      <div className="form-page">
+        <div className="form-container">
+          <h2>List an item for rent</h2>
+          <p className="form-subtext">Share the details so renters know exactly what they're getting.</p>
 
-          {/* Image */}
-          <label>Upload Image</label>
-          <input
-            type="file"
-            name="image"
-            accept="image/jpeg, image/png"
-            onChange={handleFileUpload}
-            required
-          />
+          <div className="image-preview">
+            {img ? <img src={img} alt="Preview" /> : "Image preview will appear here"}
+          </div>
 
-          {/* Category */}
-          <label>Category</label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Category</option>
-            <option value="men">Men</option>
-            <option value="women">Women</option>
-            <option value="kids">Kids</option>
-          </select>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              <div className="field full">
+                <label>Product Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          {/* Sub-category */}
-          <label>Sub-category</label>
-          <select
-            name="sub_category"
-            value={formData.sub_category}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Sub-category</option>
-            <option value="Accessories">Accessories</option>
-            <option value="Costumes">Costumes</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Footwear">Footwear</option>
-          </select>
+              <div className="field full">
+                <label>Upload Image</label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/jpeg, image/png"
+                  onChange={handleFileUpload}
+                  required
+                />
+              </div>
 
-          {/* Available Quantity */}
-          <label>Available Quantity</label>
-          <input
-            type="number"
-            name="available_quantity"
-            value={formData.available_quantity}
-            onChange={handleChange}
-            required
-            min="1"
-          />
+              <div className="field">
+                <label>Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="kids">Kids</option>
+                </select>
+              </div>
 
-          {/* Size */}
-          <label>Size</label>
-          <input
-            type="text"
-            name="size"
-            value={formData.size}
-            onChange={handleChange}
-            required
-          />
+              <div className="field">
+                <label>Sub-category</label>
+                <select
+                  name="sub_category"
+                  value={formData.sub_category}
+                  onChange={handleChange}
+                  required
+                  disabled={!formData.category}
+                >
+                  <option value="">
+                    {formData.category
+                      ? "Select Sub-category"
+                      : "Select a category first"}
+                  </option>
+                  {(GARMENT_TYPES_BY_CATEGORY[formData.category] || []).map(
+                    (type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    )
+                  )}
+                  <option value="Footwear">Footwear</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Costumes">Costumes</option>
+                </select>
+              </div>
 
-          {/* Cost per Day */}
-          <label>Cost per Day</label>
-          <input
-            type="number"
-            name="cost_per_day"
-            value={formData.cost_per_day}
-            onChange={handleChange}
-            required
-            min="1"
-          />
+              <div className="field">
+                <label>Available Quantity</label>
+                <input
+                  type="number"
+                  name="available_quantity"
+                  value={formData.available_quantity}
+                  onChange={handleChange}
+                  required
+                  min="1"
+                />
+              </div>
 
-          <label>Product description</label>
-          <input
-            type="text"
-            name="product_description"
-            value={formData.product_description}
-            onChange={handleChange}
-            required
-          />
+              <div className="field">
+                <label>Size</label>
+                <input
+                  type="text"
+                  name="size"
+                  value={formData.size}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          <button type="submit">Submit</button>
-        </form>
+              <div className="field">
+                <label>Cost per Day (₹)</label>
+                <input
+                  type="number"
+                  name="cost_per_day"
+                  value={formData.cost_per_day}
+                  onChange={handleChange}
+                  required
+                  min="1"
+                />
+              </div>
+
+              <div className="field full">
+                <label>Product description</label>
+                <textarea
+                  name="product_description"
+                  value={formData.product_description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-block">
+              Submit Listing
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );

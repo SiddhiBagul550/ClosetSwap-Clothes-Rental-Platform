@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 660" width="900" height="660" font-family="Karla, sans-serif">
+  <style>
+    .lbl { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; fill: #918C9C; }
+    .note { font-size: 12px; fill: #5D5869; }
+    .wm { font-family: Fraunces, Georgia, serif; font-weight: 400; letter-spacing: -.01em; }
+  </style>
+
+  <rect width="900" height="660" fill="#FBFAF8"/>
+
+  <g id="mark-geometry" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="mark" viewBox="0 0 64 64">
+      <path d="M32 26 L14.5 46.5 Q12.5 49.5 16 49.5 L48 49.5 Q51.5 49.5 49.5 46.5 Z"
+            fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M32 26 L32 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M32 21 A6 6 0 1 0 27.2 11.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M23.2 13.2 L27.4 11.3 L29.0 7.4" fill="none" stroke="currentColor" stroke-width="2.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </g>
+
+  <text class="lbl" x="56" y="56">Primary lockup</text>
+  <line x1="56" y1="70" x2="844" y2="70" stroke="#EAE6EA" stroke-width="1"/>
+
+  <g transform="translate(56 100)">
+    <g color="#211E2B"><use href="#mark" width="62" height="62" y="4"/></g>
+    <text class="wm" x="80" y="52" font-size="40" fill="#211E2B">Closet<tspan fill="#D99BAE">·</tspan>Swap</text>
+    <text class="lbl" x="82" y="72">A rental wardrobe · Pune</text>
+  </g>
+
+  <text class="lbl" x="480" y="118">Stacked</text>
+  <g transform="translate(480 132)">
+    <g color="#211E2B"><use href="#mark" width="44" height="44"/></g>
+    <text class="wm" x="0" y="72" font-size="26" fill="#211E2B">Closet<tspan fill="#D99BAE">·</tspan>Swap</text>
+  </g>
+
+  <text class="lbl" x="56" y="250">Mark only</text>
+  <line x1="56" y1="264" x2="844" y2="264" stroke="#EAE6EA" stroke-width="1"/>
+
+  <g transform="translate(56 288)">
+    <rect width="120" height="120" rx="4" fill="#FFFFFF" stroke="#EAE6EA"/>
+    <g color="#211E2B"><use href="#mark" x="28" y="28" width="64" height="64"/></g>
+    <text class="lbl" x="0" y="140">Ink on paper</text>
+  </g>
+
+  <g transform="translate(200 288)">
+    <rect width="120" height="120" rx="4" fill="#F6EFF1" stroke="#F0DDE3"/>
+    <g color="#8E4F63"><use href="#mark" x="28" y="28" width="64" height="64"/></g>
+    <text class="lbl" x="0" y="140">Deep rose on tint</text>
+  </g>
+
+  <g transform="translate(344 288)">
+    <rect width="120" height="120" rx="4" fill="#211E2B"/>
+    <g color="#FBFAF8"><use href="#mark" x="28" y="28" width="64" height="64"/></g>
+    <text class="lbl" x="0" y="140">Reversed</text>
+  </g>
+
+  <g transform="translate(488 288)">
+    <rect width="120" height="120" rx="4" fill="#FFFFFF" stroke="#EAE6EA"/>
+    <g color="#211E2B"><use href="#mark" x="40" y="40" width="40" height="40"/></g>
+    <text class="lbl" x="0" y="140">Clear space = hook height</text>
+    <rect x="34" y="34" width="52" height="52" fill="none" stroke="#D99BAE" stroke-width="1" stroke-dasharray="3 3"/>
+  </g>
+
+  <text class="lbl" x="56" y="470">Small sizes</text>
+  <line x1="56" y1="484" x2="844" y2="484" stroke="#EAE6EA" stroke-width="1"/>
+
+  <g transform="translate(56 506)">
+    <g color="#211E2B"><use href="#mark" width="48" height="48"/></g>
+    <text class="lbl" x="10" y="66">48</text>
+
+    <g color="#211E2B"><use href="#mark" x="90" y="16" width="32" height="32"/></g>
+    <text class="lbl" x="98" y="66">32</text>
+
+    <g color="#211E2B"><use href="#mark" x="170" y="24" width="24" height="24"/></g>
+    <text class="lbl" x="174" y="66">24</text>
+
+    <g color="#211E2B"><use href="#mark" x="234" y="32" width="16" height="16"/></g>
+    <text class="lbl" x="236" y="66">16</text>
+
+    <rect x="300" y="8" width="40" height="40" rx="9" fill="#211E2B"/>
+    <g color="#FBFAF8"><use href="#mark" x="308" y="16" width="24" height="24"/></g>
+    <text class="lbl" x="302" y="66">App icon</text>
+  </g>
+
+  <g transform="translate(500 500)">
+    <text class="lbl" x="0" y="0">Palette</text>
+    <g transform="translate(0 12)">
+      <rect width="52" height="52" rx="3" fill="#211E2B"/><text class="note" x="0" y="70" font-size="10">211E2B</text>
+      <rect x="66" width="52" height="52" rx="3" fill="#D99BAE"/><text class="note" x="66" y="70" font-size="10">D99BAE</text>
+      <rect x="132" width="52" height="52" rx="3" fill="#8FA5C2"/><text class="note" x="132" y="70" font-size="10">8FA5C2</text>
+      <rect x="198" width="52" height="52" rx="3" fill="#A6C299"/><text class="note" x="198" y="70" font-size="10">A6C299</text>
+      <rect x="264" width="52" height="52" rx="3" fill="#FBFAF8" stroke="#EAE6EA"/><text class="note" x="264" y="70" font-size="10">FBFAF8</text>
+    </g>
+  </g>
+</svg>

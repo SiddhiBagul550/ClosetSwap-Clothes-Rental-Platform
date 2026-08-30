@@ -1,13 +1,402 @@
+/* ==========================================================================
+   ClosetSwap Design System
+   Soft, modern, pastel visual language shared across the whole app.
+   ========================================================================== */
+
+:root {
+  /* Editorial palette — paper, ink, three audience accents */
+  --paper: #fbfaf8;
+  --surface: #ffffff;
+  --bg: #fbfaf8;
+  --field-bg: #f6f5f3;
+  --border: #eae6ea;
+  --border-soft: #f3f0f3;
+
+  --ink-900: #211e2b;
+  --ink-700: #5d5869;
+  --ink-500: #918c9c;
+  --ink-300: #c7c3cc;
+
+  /* Default accent (women) — pages outside the audience-aware shopping
+     view (auth, cart, rent forms) use this as the one brand accent. */
+  --accent: #d99bae;
+  --accent-deep: #8e4f63;
+  --accent-tint: #faf1f4;
+  --accent-line: #f0dde3;
+
+  --accent-women: #d99bae;
+  --accent-women-deep: #8e4f63;
+  --accent-women-tint: #faf1f4;
+  --accent-women-line: #f0dde3;
+
+  --accent-men: #8fa5c2;
+  --accent-men-deep: #3f5878;
+  --accent-men-tint: #f0f3f7;
+  --accent-men-line: #dde4ee;
+
+  --accent-kids: #a6c299;
+  --accent-kids-deep: #4c6b41;
+  --accent-kids-tint: #f2f6ef;
+  --accent-kids-line: #dfe9da;
+
+  --success: #4c6b41;
+  --danger: #b5495f;
+
+  --gradient-primary: var(--ink-900);
+  --gradient-soft: var(--accent-tint);
+
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 3px rgba(33, 30, 43, 0.06);
+  --shadow-md: 0 8px 20px rgba(33, 30, 43, 0.08);
+  --shadow-lg: 0 16px 40px rgba(33, 30, 43, 0.12);
+
+  --font-heading: "Fraunces", "Georgia", serif;
+  --font-body: "Karla", "Segoe UI", sans-serif;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink-900);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+  margin: 0 0 8px;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+::selection {
+  background: var(--accent-tint);
+  color: var(--ink-900);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-300);
+}
+
+/* Focus visibility for keyboard users */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ink-900);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Shared utility classes                                                  */
+/* ---------------------------------------------------------------------- */
+
+.page {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.page-heading {
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.page-subheading {
+  color: var(--ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 22px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--ink-900);
+  color: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink-900);
+  border: 1.5px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--accent-tint);
+  border-color: var(--accent-line);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-700);
+}
+
+.btn-ghost:hover {
+  background: var(--accent-tint);
+}
+
+.btn-danger {
+  background: #fbeef0;
+  color: var(--danger);
+  border: 1.5px solid #f2d7db;
+}
+
+.btn-danger:hover {
+  background: #f6dfe3;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--ink-700);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+/* Inputs */
+.field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 6px;
+}
+
+.input,
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field-bg);
+  font-size: 0.95rem;
+  color: var(--ink-900);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.input:focus,
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--accent-tint);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Badges / chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--accent-tint);
+  color: var(--ink-700);
+}
+
+.chip-mint {
+  background: var(--accent-kids-tint);
+  color: var(--accent-kids-deep);
+}
+
+.chip-pink {
+  background: var(--accent-women-tint);
+  color: var(--accent-women-deep);
+}
+
+.chip-butter {
+  background: var(--field-bg);
+  color: var(--ink-700);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 60px 24px;
+  color: var(--ink-500);
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.3s ease both;
+}
+
+.empty-state .empty-emoji {
+  font-size: 2.6rem;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--gradient-soft);
+  margin-bottom: 6px;
+}
+
+.empty-state h3 {
+  color: var(--ink-900);
+}
+
+/* Loading skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--field-bg) 25%, var(--border-soft) 37%, var(--field-bg) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }

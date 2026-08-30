@@ -25,14 +25,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route
-          path="/shopping"
-          element={
-            <ProtectedRoute>
-              <Shopping />
-            </ProtectedRoute>
-          }
-        />
+        {/* Browsing products is public; only viewing a product's detail
+            page or acting on it (like/cart/rent/profile) requires login. */}
+        <Route path="/shopping" element={<Shopping />} />
         <Route
           path="/product/:id"
           element={
@@ -89,16 +84,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/"
-          element={
-            localStorage.getItem("jwtToken") ? (
-              <Navigate to="/splash" />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        <Route path="/" element={<Navigate to="/shopping" replace />} />
       </Routes>
     </Router>
   );

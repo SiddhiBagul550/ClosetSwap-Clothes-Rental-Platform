@@ -1,0 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300&family=Karla:wght@300;400;500;600&display=swap");
+
+.cs-auth-page * {
+  box-sizing: border-box;
+}
+
+.cs-auth-page input:focus-visible,
+.cs-auth-page button:focus-visible {
+  outline: 2px solid #8e4f63;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-auth-page * {
+    transition: none !important;
+  }
+}
+
+.cs-auth {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  min-height: 100vh;
+}
+
+@media (max-width: 820px) {
+  .cs-auth {
+    grid-template-columns: 1fr;
+  }
+  .cs-auth aside {
+    border-right: none !important;
+    border-bottom: 1px solid #eae6ea;
+    padding: 28px 26px !important;
+    gap: 22px;
+  }
+  .cs-auth main {
+    padding: 34px 26px !important;
+  }
+}

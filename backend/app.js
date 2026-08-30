@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
-    origin: "http://localhost:3000", // Your frontend origin
+    origin: /^http:\/\/localhost:\d+$/, // Any localhost port, for local dev
     credentials: true, // Allow credentials (cookies)
   })
 );

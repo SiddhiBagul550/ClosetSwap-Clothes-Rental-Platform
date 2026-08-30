@@ -72,33 +72,50 @@ export default function UpdateProduct() {
 
   return (
     <div className="main-container">
-      <h2 className="update-product-heading">Update product details</h2>
-      <h3 className="update-product-heading">{data.name}</h3>
+      <h2 className="update-product-heading page-heading">Update product details</h2>
+      <p className="page-subheading">{data.name}</p>
       <form className="update-form" onSubmit={handleSubmit}>
-        <label>Product description</label>
-        <input
-          type="text"
-          name="product_description"
-          value={productDescription}
-          onChange={(e) => setProductDescription(e.target.value)}
-        />
+        <div className="field">
+          <label>Product description</label>
+          <textarea
+            name="product_description"
+            placeholder={data.product_description || "Enter a new description"}
+            value={productDescription}
+            onChange={(e) => setProductDescription(e.target.value)}
+          />
+        </div>
 
-        <label>Available Quantity</label>
-        <input
-          type="number"
-          name="available_quantity"
-          value={availableQuantity}
-          onChange={(e) => setAvailableQuantity(e.target.value)}
-        />
+        <div className="field">
+          <label>Available Quantity</label>
+          <input
+            type="number"
+            name="available_quantity"
+            placeholder={
+              data.available_quantity !== undefined
+                ? `Current: ${data.available_quantity}`
+                : ""
+            }
+            value={availableQuantity}
+            onChange={(e) => setAvailableQuantity(e.target.value)}
+          />
+        </div>
 
-        <label>Cost per Day</label>
-        <input
-          type="number"
-          name="cost_per_day"
-          value={costPerDay}
-          onChange={(e) => setCostPerDay(e.target.value)}
-        />
-        <button type="submit">Update</button>
+        <div className="field">
+          <label>Cost per Day (₹)</label>
+          <input
+            type="number"
+            name="cost_per_day"
+            placeholder={
+              data.cost_per_day !== undefined ? `Current: ${data.cost_per_day}` : ""
+            }
+            value={costPerDay}
+            onChange={(e) => setCostPerDay(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary btn-block">
+          Update
+        </button>
       </form>
     </div>
   );

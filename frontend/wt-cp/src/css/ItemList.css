@@ -1,0 +1,156 @@
+.list-page {
+  padding: 28px 20px 60px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.item-card {
+  display: flex;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: fadeInUp 0.25s ease both;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  background: var(--gradient-soft);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.item-meta {
+  font-size: 0.85rem;
+  color: var(--ink-500);
+  margin-bottom: 2px;
+}
+
+.item-price {
+  font-weight: 700;
+  color: var(--success);
+}
+
+.item-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.item-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--ink-700);
+}
+
+.item-control select,
+.item-control input {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field-bg);
+  font-size: 0.85rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.item-actions .btn {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+/* react-modal content */
+.contact-modal {
+  max-width: 420px;
+  width: 90vw;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  box-shadow: var(--shadow-lg);
+  border: none;
+}
+
+.contact-modal h2 {
+  font-size: 1.2rem;
+}
+
+.contact-modal p {
+  color: var(--ink-500);
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+
+.contact-modal textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field-bg);
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+.contact-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(63, 58, 82, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+@media (max-width: 600px) {
+  .item-card {
+    flex-direction: column;
+  }
+
+  .item-image {
+    width: 100%;
+    height: 160px;
+  }
+}

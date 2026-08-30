@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import NavBar from "../components/navBar";
+import "../css/ItemList.css";
 
 const Liked = () => {
-  const price1 = 50; // price for product 1
   const [products, setProducts] = useState([]);
   const [likedItems, setlikedItems] = useState([]);
 
@@ -41,109 +41,41 @@ const Liked = () => {
     getData();
   }, []);
 
+  const likedProducts = products.filter((product) => likedItems.includes(product._id));
+
   return (
     <>
       <NavBar />
-      <div style={styles.container}>
-        <h2 style={styles.heading}>Liked Items</h2>
-        {products.length === 0 ? <h2>No data available....</h2> : ""}
-        {products.map((product, index) => {
-          return likedItems.includes(product._id) ? (
-            <div style={styles.likedItem} key={index}>
-              <div style={styles.imagePlaceholder}>
-                <img src={product.img} alt={product.img} style={styles.image} />
-              </div>
-              <div style={styles.itemDetails}>
-                <p style={styles.productName}>{product.name}</p>
-                <p style={styles.productDetails}>Size: {product.size}</p>
+      <div className="list-page">
+        <h2 className="page-heading">Liked Items</h2>
+        <p className="page-subheading">Everything you've favourited, all in one place.</p>
 
-                <p style={styles.productDetails}>
+        {likedProducts.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-emoji">💗</div>
+            <h3>No liked items yet</h3>
+            <p>Tap the heart on a product to save it here.</p>
+          </div>
+        ) : (
+          likedProducts.map((product) => (
+            <div className="item-card" key={product._id}>
+              <div className="item-image">
+                <img src={product.img} alt={product.img} />
+              </div>
+              <div className="item-details">
+                <p className="item-name">{product.name}</p>
+                <p className="item-meta">Size: {product.size}</p>
+                <p className="item-meta">
                   Available quantities: {product.available_quantity}
                 </p>
-                <p style={styles.productDetails}>
-                  Price: ₹{product.cost_per_day}/day
-                </p>
+                <p className="item-price">₹{product.cost_per_day}/day</p>
               </div>
             </div>
-          ) : null; // Returning null when the product is not liked
-        })}
+          ))
+        )}
       </div>
     </>
   );
-};
-
-const styles = {
-  container: {
-    padding: "20px",
-    backgroundColor: "#F2F6FF",
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  heading: {
-    fontSize: "24px",
-    marginBottom: "20px",
-    color: "#4A4A4A",
-  },
-  likedItem: {
-    display: "flex",
-    flexDirection: "row",
-    backgroundColor: "#E6E6E6",
-    padding: "15px",
-    borderRadius: "10px",
-    marginBottom: "15px",
-    width: "90%",
-    maxWidth: "500px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  imagePlaceholder: {
-    width: "80px",
-    height: "80px",
-    backgroundColor: "#DADADA",
-    borderRadius: "10px",
-    marginRight: "15px",
-  },
-  itemDetails: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-  },
-  productName: {
-    fontSize: "18px",
-    fontWeight: "bold",
-    marginBottom: "5px",
-    color: "#4A4A4A",
-  },
-  productDetails: {
-    fontSize: "14px",
-    color: "#4A4A4A",
-  },
-  totalPrice: {
-    fontSize: "16px",
-    fontWeight: "bold",
-    marginTop: "10px",
-    color: "#4A4A4A",
-  },
-  dropdown: {
-    marginLeft: "10px",
-    padding: "5px",
-    fontSize: "14px",
-    borderRadius: "5px",
-    border: "1px solid #C6C6C6",
-  },
-  buttonContainer: {
-    display: "flex",
-    flexDirection: "column",
-    width: "90%",
-    maxWidth: "500px",
-    marginTop: "20px",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
 };
 
 export default Liked;
