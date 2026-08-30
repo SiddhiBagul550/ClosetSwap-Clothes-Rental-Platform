@@ -332,6 +332,34 @@ function WherePanel({ theme, area, setArea, radius, setRadius, dateFrom, setDate
   );
 }
 
+/* Points at the navbar "Set area" control on first visit, so new users
+   notice they can pick an area, distance and rental dates from there
+   instead of stumbling onto it. Dismisses itself once, permanently,
+   via localStorage — and immediately if the user opens the panel it
+   points at. */
+function WhereCoachmark({ theme, onDismiss }) {
+  return (
+    <div role="status" style={{
+      position: "absolute", top: "calc(100% + 14px)", left: 0, width: 250, zIndex: 45,
+      background: T.ink, color: T.paper, borderRadius: 6, padding: "14px 16px",
+      boxShadow: "0 10px 28px rgba(0,0,0,.22)",
+    }}>
+      <div aria-hidden="true" style={{ position: "absolute", top: -6, left: 24, width: 12, height: 12, background: T.ink, transform: "rotate(45deg)" }} />
+      <button onClick={onDismiss} aria-label="Dismiss"
+        style={{ position: "absolute", top: 6, right: 6, background: "none", border: "none", color: T.paper, opacity: .6, cursor: "pointer", fontSize: 13, lineHeight: 1, padding: 6 }}>
+        ✕
+      </button>
+      <p style={{ fontFamily: "Karla, sans-serif", fontSize: 13, lineHeight: 1.5, margin: "0 0 10px", paddingRight: 12 }}>
+        Set your <b>area</b>, travel distance and rental <b>dates</b> here — the rail updates to match.
+      </p>
+      <button onClick={onDismiss}
+        style={{ fontFamily: "Karla, sans-serif", fontSize: 12, fontWeight: 500, padding: "7px 14px", border: "none", borderRadius: 999, background: theme.accent, color: T.ink, cursor: "pointer" }}>
+        Got it
+      </button>
+    </div>
+  );
+}
+
 function readAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -714,6 +742,7 @@ export default function ClosetSwap() {
   const [dateTo, setDateTo] = useState(() => addDays(new Date(), 5));
   const [whereOpen, setWhereOpen] = useState(false);
   const whereRef = useRef(null);
+  const [showWhereCoach, setShowWhereCoach] = useState(false);
 
   useEffect(() => {
     if (!whereOpen) return;
@@ -721,6 +750,20 @@ export default function ClosetSwap() {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [whereOpen]);
+
+  const dismissWhereCoach = useCallback(() => {
+    setShowWhereCoach(false);
+    try { localStorage.setItem("cs_where_coach_seen", "1"); } catch { /* private mode, etc — just skip persisting */ }
+  }, []);
+
+  useEffect(() => {
+    if (screen !== "app") return;
+    let seen = false;
+    try { seen = !!localStorage.getItem("cs_where_coach_seen"); } catch { /* private mode, etc */ }
+    if (seen) return;
+    const t = setTimeout(() => setShowWhereCoach(true), 700);
+    return () => clearTimeout(t);
+  }, [screen]);
 
   const [user, setUser] = useState(() => api.getStoredUser());
   const [liked, setLiked] = useState([]);
@@ -857,15 +900,17 @@ export default function ClosetSwap() {
           </div>
 
           <div ref={whereRef} style={{ position: "relative" }}>
-            <button onClick={() => setWhereOpen((o) => !o)}
+            <button onClick={() => { setWhereOpen((o) => !o); dismissWhereCoach(); }}
               style={{ fontFamily: "Karla, sans-serif", fontSize: 13, color: T.ink2, background: T.card, border: `1px solid ${T.line}`, borderRadius: 999, padding: "8px 15px", cursor: "pointer" }}>
               {area || "Set area"} · {radius} km · {formatDateRange(dateFrom, dateTo)}
             </button>
-            {whereOpen && (
+            {whereOpen ? (
               <WherePanel theme={theme} area={area} setArea={setArea} radius={radius} setRadius={setRadius}
                 dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
                 onDone={() => setWhereOpen(false)} />
-            )}
+            ) : showWhereCoach ? (
+              <WhereCoachmark theme={theme} onDismiss={dismissWhereCoach} />
+            ) : null}
           </div>
 
           <nav style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: T.ink2 }}>
