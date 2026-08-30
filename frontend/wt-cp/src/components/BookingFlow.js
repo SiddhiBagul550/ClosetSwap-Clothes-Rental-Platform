@@ -202,7 +202,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
   const lenderDisplayName = isShop ? listing.lender.name : (listing.lender.name || "Individual lender");
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={`Book ${listing.name}`}
+    <div role="dialog" aria-modal="true" aria-label={`Book ${listing.name}`} className="csbk-backdrop"
       style={{ position: "fixed", inset: 0, background: "rgba(33,30,43,.4)", display: "grid", placeItems: "center", zIndex: 80, padding: 20 }}
       onClick={onClose}>
       <style>{`
@@ -211,7 +211,23 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
         @media (prefers-reduced-motion:reduce){.csbk *{transition:none!important}}
         .csbk-grid{display:grid;grid-template-columns:1fr 320px;gap:36px;align-items:start}
         .csbk-cal{display:grid;grid-template-columns:1fr 1fr;gap:26px}
-        @media(max-width:820px){.csbk-grid{grid-template-columns:1fr}.csbk-cal{grid-template-columns:1fr}}
+        @media(max-width:820px){
+          .csbk-grid{grid-template-columns:1fr}
+          .csbk-cal{grid-template-columns:1fr}
+          .csbk-grid aside{position:static}
+        }
+        @media(max-width:640px){
+          .csbk-backdrop{padding:0!important}
+          .csbk{width:100vw!important;height:100vh!important;height:100dvh!important;border-radius:0!important;border:none!important}
+          .csbk main{padding:20px 16px 28px!important}
+        }
+        @media(max-width:480px){
+          .csbk-topbar{padding:12px 16px!important;gap:12px!important}
+          .csbk-steps{gap:10px!important}
+          .csbk-steps span{font-size:10px!important}
+          .csbk-actions{flex-direction:column!important}
+          .csbk-actions button{width:100%}
+        }
       `}</style>
 
       <div className="csbk" onClick={(e) => e.stopPropagation()}
@@ -219,14 +235,14 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
           width: "min(1000px,100%)", height: "min(92vh,880px)", background: T.paper, borderRadius: 6,
           border: `1px solid ${T.line}`, display: "flex", flexDirection: "column", overflow: "hidden",
         }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "16px 28px", borderBottom: `1px solid ${T.line}`, background: T.card, flexShrink: 0 }}>
-          <button onClick={onClose} aria-label="Close booking" style={{ background: "none", border: "none", fontSize: 22, color: T.ink2, cursor: "pointer", lineHeight: 1 }}>×</button>
-          <div style={{ display: "flex", gap: 22, marginLeft: "auto" }}>
+        <div className="csbk-topbar" style={{ display: "flex", alignItems: "center", gap: 20, padding: "16px 28px", borderBottom: `1px solid ${T.line}`, background: T.card, flexShrink: 0 }}>
+          <button onClick={onClose} aria-label="Close booking" style={{ background: "none", border: "none", fontSize: 22, color: T.ink2, cursor: "pointer", lineHeight: 1, flexShrink: 0 }}>×</button>
+          <div className="csbk-steps" style={{ display: "flex", gap: 22, marginLeft: "auto", overflowX: "auto" }}>
             {["Dates", "Handover", "Review", "Done"].map((s, i) => (
               <span key={s} style={{
                 fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase",
                 color: step === i + 1 ? T.ink : T.ink3, fontWeight: step === i + 1 ? 600 : 400,
-                display: "flex", alignItems: "center", gap: 6,
+                display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", flexShrink: 0,
               }}>
                 {step > i + 1 && <Tick s={12} />}{s}
               </span>
@@ -441,7 +457,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
               )}
 
               {step < 4 && (
-                <div style={{ display: "flex", gap: 10, marginTop: 30, borderTop: `1px solid ${T.line}`, paddingTop: 24 }}>
+                <div className="csbk-actions" style={{ display: "flex", gap: 10, marginTop: 30, borderTop: `1px solid ${T.line}`, paddingTop: 24 }}>
                   {step > 1 && <button onClick={() => { setStep(step - 1); setErr(""); }} style={btn(false)}>Back</button>}
                   <button onClick={next} style={btn(true)}>
                     {step === 3 ? (isShop ? `Pay ${inr(dueNow)} and book` : "Send request") : "Continue"}

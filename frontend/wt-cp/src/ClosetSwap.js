@@ -279,7 +279,7 @@ function Splash({ onDone }) {
    starts immediately and these stay adjustable, not mandatory. */
 function WherePanel({ theme, area, setArea, radius, setRadius, dateFrom, setDateFrom, dateTo, setDateTo, onDone }) {
   return (
-    <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, width: 320, background: T.card, border: `1px solid ${T.line}`, borderRadius: 6, padding: "20px 22px", zIndex: 40, boxShadow: "0 8px 24px rgba(0,0,0,.12)" }}>
+    <div className="cs-where-panel" style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, width: "min(320px, calc(100vw - 48px))", background: T.card, border: `1px solid ${T.line}`, borderRadius: 6, padding: "20px 22px", zIndex: 40, boxShadow: "0 8px 24px rgba(0,0,0,.12)" }}>
       <p style={{ ...label, marginBottom: 14 }}>Where & when</p>
 
       <label htmlFor="area" style={{ display: "block", fontSize: 12, color: T.ink2, marginBottom: 6, fontWeight: 500 }}>Your area in Pune</label>
@@ -340,7 +340,7 @@ function WherePanel({ theme, area, setArea, radius, setRadius, dateFrom, setDate
 function WhereCoachmark({ theme, onDismiss }) {
   return (
     <div role="status" style={{
-      position: "absolute", top: "calc(100% + 14px)", left: 0, width: 250, zIndex: 45,
+      position: "absolute", top: "calc(100% + 14px)", left: 0, width: "min(250px, calc(100vw - 48px))", zIndex: 45,
       background: T.ink, color: T.paper, borderRadius: 6, padding: "14px 16px",
       boxShadow: "0 10px 28px rgba(0,0,0,.22)",
     }}>
@@ -431,7 +431,7 @@ function Lend({ theme, user, onNeedLogin, onListed }) {
   };
 
   return (
-    <div style={{ maxWidth: 1220, margin: "0 auto", padding: "64px 32px 88px" }}>
+    <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "64px 32px 88px" }}>
       <p style={{ ...label, marginBottom: 12 }}>For shops and for anyone with a full wardrobe</p>
       <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(34px,4.4vw,54px)", letterSpacing: "-.025em", lineHeight: 1.06, margin: "0 0 18px" }}>
         The outfit you wore once<br /><em style={{ fontStyle: "italic", color: theme.deep }}>can pay for itself.</em>
@@ -541,7 +541,7 @@ function Lend({ theme, user, onNeedLogin, onListed }) {
    your own piece), just what's live and a way to take it down. */
 function MyListings({ items, loading, error, onRetry, onRemove, removingId }) {
   return (
-    <div style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 88px" }}>
+    <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 88px" }}>
       <p style={{ ...label, marginBottom: 16 }}>{items.length} piece{items.length === 1 ? "" : "s"} you've listed</p>
       <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(30px,4vw,46px)", letterSpacing: "-.025em", margin: "0 0 34px" }}>
         Your listings
@@ -743,6 +743,8 @@ export default function ClosetSwap() {
   const [whereOpen, setWhereOpen] = useState(false);
   const whereRef = useRef(null);
   const [showWhereCoach, setShowWhereCoach] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     if (!whereOpen) return;
@@ -750,6 +752,15 @@ export default function ClosetSwap() {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [whereOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e) => { if (headerRef.current && !headerRef.current.contains(e.target)) setMenuOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, [menuOpen]);
 
   const dismissWhereCoach = useCallback(() => {
     setShowWhereCoach(false);
@@ -876,65 +887,99 @@ export default function ClosetSwap() {
         .cs-shell{display:grid;grid-template-columns:196px 1fr;gap:44px}
         .cs-rail{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
         .cs-rail::-webkit-scrollbar{display:none}
+        .cs-menu-toggle{display:none}
+        .cs-header-controls{display:flex;align-items:center;gap:22px;flex-wrap:wrap;flex:1;min-width:0}
         @media(max-width:900px){.cs-shell{grid-template-columns:1fr;gap:26px}
           .cs-auth{grid-template-columns:1fr!important}
           .cs-auth aside{border-right:none!important;border-bottom:1px solid ${T.line};padding:28px 24px!important}
           .cs-auth main{padding:34px 24px!important}}
+        @media(max-width:760px){
+          .cs-header-inner{padding:0 18px!important;gap:12px!important}
+          .cs-menu-toggle{display:inline-flex!important}
+          .cs-header-controls{
+            display:none;position:absolute;top:100%;left:0;right:0;
+            flex-direction:column;align-items:stretch;gap:14px;
+            background:${T.card};border-bottom:1px solid ${T.line};
+            padding:18px 20px 22px;box-shadow:0 14px 30px rgba(33,30,43,.14);
+            max-height:calc(100vh - 70px);overflow-y:auto;
+          }
+          .cs-header-controls.cs-open{display:flex}
+          .cs-tabs{width:100%;justify-content:space-between}
+          .cs-where-wrap{width:100%}
+          .cs-where-wrap>button{width:100%;text-align:left}
+          .cs-nav{margin-left:0!important;flex-direction:column;align-items:flex-start!important;gap:14px!important;width:100%}
+          .cs-where-panel,.cs-where-wrap [role="status"]{position:static!important;top:auto!important;left:auto!important;width:100%!important;margin-top:10px}
+        }
+        @media(max-width:640px){.cs-container{padding-left:18px!important;padding-right:18px!important}}
       `}</style>
 
       {/* Header */}
-      <header style={{ position: "sticky", top: 0, zIndex: 30, background: "rgba(251,250,248,.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.line}` }}>
-        <div style={{ maxWidth: 1220, margin: "0 auto", padding: "0 32px", height: 70, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap" }}>
-          <button onClick={() => setView("browse")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+      <header ref={headerRef} style={{ position: "sticky", top: 0, zIndex: 30, background: "rgba(251,250,248,.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.line}` }}>
+        <div className="cs-header-inner" style={{ maxWidth: 1220, margin: "0 auto", padding: "0 32px", height: 70, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap", position: "relative" }}>
+          <button onClick={() => { setView("browse"); setMenuOpen(false); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
             <Wordmark accent={theme.accent} />
           </button>
 
-          <div role="tablist" aria-label="Shop for" style={{ display: "flex", gap: 2, border: `1px solid ${T.line}`, borderRadius: 999, padding: 3, background: T.card }}>
-            {Object.entries(AUD).map(([k, v]) => (
-              <button key={k} role="tab" aria-selected={aud === k} onClick={() => { switchAud(k); setView("browse"); }}
-                style={{ fontFamily: "Karla, sans-serif", fontSize: 13, padding: "7px 16px", borderRadius: 999, border: "none", cursor: "pointer",
-                  background: aud === k ? v.tint : "transparent", color: aud === k ? v.deep : T.ink2, fontWeight: aud === k ? 600 : 400, transition: "all .22s ease" }}>
-                {v.label}
-              </button>
-            ))}
-          </div>
+          <button type="button" className="cs-menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            style={{ display: "none", alignItems: "center", justifyContent: "center", width: 38, height: 38, marginLeft: "auto", flexShrink: 0, border: `1px solid ${T.line}`, borderRadius: 8, background: T.card, cursor: "pointer" }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              {menuOpen ? (
+                <path d="M2 2 L14 14 M14 2 L2 14" stroke={T.ink} strokeWidth="1.6" strokeLinecap="round" />
+              ) : (
+                <path d="M2 4 H14 M2 8 H14 M2 12 H14" stroke={T.ink} strokeWidth="1.6" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
 
-          <div ref={whereRef} style={{ position: "relative" }}>
-            <button onClick={() => { setWhereOpen((o) => !o); dismissWhereCoach(); }}
-              style={{ fontFamily: "Karla, sans-serif", fontSize: 13, color: T.ink2, background: T.card, border: `1px solid ${T.line}`, borderRadius: 999, padding: "8px 15px", cursor: "pointer" }}>
-              {area || "Set area"} · {radius} km · {formatDateRange(dateFrom, dateTo)}
-            </button>
-            {whereOpen ? (
-              <WherePanel theme={theme} area={area} setArea={setArea} radius={radius} setRadius={setRadius}
-                dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
-                onDone={() => setWhereOpen(false)} />
-            ) : showWhereCoach ? (
-              <WhereCoachmark theme={theme} onDismiss={dismissWhereCoach} />
-            ) : null}
-          </div>
-
-          <nav style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: T.ink2 }}>
-            <button onClick={() => setView("lend")} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "lend" ? T.ink : T.ink2, cursor: "pointer" }}>Lend yours</button>
-            <button onClick={() => (user ? setView("mylistings") : goToAuth("login"))} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mylistings" ? T.ink : T.ink2, cursor: "pointer" }}>My listings</button>
-            <span onClick={() => (user ? setSavedOnly((s) => !s) : goToAuth("login"))}
-              style={{ cursor: "pointer", color: savedOnly ? theme.deep : T.ink2, fontWeight: savedOnly ? 600 : 400 }}>
-              Saved {liked.length > 0 && <b style={{ color: theme.deep }}>({liked.length})</b>}
-            </span>
-            {user ? (
-              <>
-                <span style={{ color: T.ink }}>Hi, {user.username?.split(" ")[0] || "there"}</span>
-                <button onClick={handleLogout}
-                  style={{ fontFamily: "Karla, sans-serif", fontSize: 13, background: "transparent", color: T.ink2, border: `1px solid ${T.line}`, padding: "9px 17px", borderRadius: 999, cursor: "pointer" }}>
-                  Log out
+          <div className={`cs-header-controls${menuOpen ? " cs-open" : ""}`}>
+            <div role="tablist" aria-label="Shop for" className="cs-tabs" style={{ display: "flex", gap: 2, border: `1px solid ${T.line}`, borderRadius: 999, padding: 3, background: T.card }}>
+              {Object.entries(AUD).map(([k, v]) => (
+                <button key={k} role="tab" aria-selected={aud === k} onClick={() => { switchAud(k); setView("browse"); setMenuOpen(false); }}
+                  style={{ fontFamily: "Karla, sans-serif", fontSize: 13, padding: "7px 16px", borderRadius: 999, border: "none", cursor: "pointer",
+                    background: aud === k ? v.tint : "transparent", color: aud === k ? v.deep : T.ink2, fontWeight: aud === k ? 600 : 400, transition: "all .22s ease" }}>
+                  {v.label}
                 </button>
-              </>
-            ) : (
-              <button onClick={() => goToAuth("login")}
-                style={{ fontFamily: "Karla, sans-serif", fontSize: 13, background: T.ink, color: T.paper, border: "none", padding: "10px 18px", borderRadius: 999, cursor: "pointer" }}>
-                Log in
+              ))}
+            </div>
+
+            <div ref={whereRef} className="cs-where-wrap" style={{ position: "relative" }}>
+              <button onClick={() => { setWhereOpen((o) => !o); dismissWhereCoach(); }}
+                style={{ fontFamily: "Karla, sans-serif", fontSize: 13, color: T.ink2, background: T.card, border: `1px solid ${T.line}`, borderRadius: 999, padding: "8px 15px", cursor: "pointer" }}>
+                {area || "Set area"} · {radius} km · {formatDateRange(dateFrom, dateTo)}
               </button>
-            )}
-          </nav>
+              {whereOpen ? (
+                <WherePanel theme={theme} area={area} setArea={setArea} radius={radius} setRadius={setRadius}
+                  dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
+                  onDone={() => setWhereOpen(false)} />
+              ) : showWhereCoach ? (
+                <WhereCoachmark theme={theme} onDismiss={dismissWhereCoach} />
+              ) : null}
+            </div>
+
+            <nav className="cs-nav" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: T.ink2 }}>
+              <button onClick={() => { setView("lend"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "lend" ? T.ink : T.ink2, cursor: "pointer" }}>Lend yours</button>
+              <button onClick={() => { user ? setView("mylistings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mylistings" ? T.ink : T.ink2, cursor: "pointer" }}>My listings</button>
+              <span onClick={() => { user ? setSavedOnly((s) => !s) : goToAuth("login"); setMenuOpen(false); }}
+                style={{ cursor: "pointer", color: savedOnly ? theme.deep : T.ink2, fontWeight: savedOnly ? 600 : 400 }}>
+                Saved {liked.length > 0 && <b style={{ color: theme.deep }}>({liked.length})</b>}
+              </span>
+              {user ? (
+                <>
+                  <span style={{ color: T.ink }}>Hi, {user.username?.split(" ")[0] || "there"}</span>
+                  <button onClick={() => { handleLogout(); setMenuOpen(false); }}
+                    style={{ fontFamily: "Karla, sans-serif", fontSize: 13, background: "transparent", color: T.ink2, border: `1px solid ${T.line}`, padding: "9px 17px", borderRadius: 999, cursor: "pointer" }}>
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => { goToAuth("login"); setMenuOpen(false); }}
+                  style={{ fontFamily: "Karla, sans-serif", fontSize: 13, background: T.ink, color: T.paper, border: "none", padding: "10px 18px", borderRadius: 999, cursor: "pointer" }}>
+                  Log in
+                </button>
+              )}
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -945,7 +990,7 @@ export default function ClosetSwap() {
         user ? (
           <MyListings items={myListings} loading={myListingsLoading} error={myListingsError} onRetry={loadMyListings} onRemove={removeListing} removingId={removingId} />
         ) : (
-          <div style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
+          <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
             <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your listings</p>
             <button onClick={() => goToAuth("login")}
               style={{ fontFamily: "Karla, sans-serif", fontSize: 14, fontWeight: 500, padding: "12px 22px", border: "none", borderRadius: 3, background: T.ink, color: T.paper, cursor: "pointer" }}>
@@ -958,7 +1003,7 @@ export default function ClosetSwap() {
       {view === "browse" && (
         <>
           {/* Hero */}
-          <section style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 34px" }}>
+          <section className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 34px" }}>
             <p style={{ ...label, marginBottom: 16 }}>{results.length} pieces within {radius} km of {area || "you"}</p>
             <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(34px,4.6vw,58px)", lineHeight: 1.04, letterSpacing: "-.025em", margin: 0, maxWidth: 720 }}>
               Dress for the occasion,<br /><em style={{ fontStyle: "italic", color: theme.deep }}>borrow it from the neighbourhood.</em>
@@ -969,7 +1014,7 @@ export default function ClosetSwap() {
           </section>
 
           {/* Catalogue */}
-          <section style={{ maxWidth: 1220, margin: "0 auto", padding: "0 32px 80px" }}>
+          <section className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "0 32px 80px" }}>
             <div className="cs-shell">
               <aside>
                 {garmentOptions.length > 0 && (
@@ -1069,7 +1114,7 @@ export default function ClosetSwap() {
 
           {/* How it works */}
           <section style={{ background: theme.tint, borderTop: `1px solid ${theme.line}`, borderBottom: `1px solid ${theme.line}` }}>
-            <div style={{ maxWidth: 1220, margin: "0 auto", padding: "60px 32px" }}>
+            <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "60px 32px" }}>
               <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 32, letterSpacing: "-.02em", margin: "0 0 32px" }}>How renting here works</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 26 }}>
                 {[
@@ -1091,7 +1136,7 @@ export default function ClosetSwap() {
       )}
 
       <footer style={{ borderTop: `1px solid ${T.line}` }}>
-        <div style={{ maxWidth: 1220, margin: "0 auto", padding: "36px 32px", display: "flex", flexWrap: "wrap", gap: 18, justifyContent: "space-between", alignItems: "center" }}>
+        <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "36px 32px", display: "flex", flexWrap: "wrap", gap: 18, justifyContent: "space-between", alignItems: "center" }}>
           <Wordmark size={17} accent={theme.accent} />
           <nav style={{ display: "flex", gap: 24, fontSize: 13, color: T.ink2, flexWrap: "wrap" }}>
             {["Lend your wardrobe", "Open a shop account", "Sizing help", "Damage policy", "Areas we cover"].map((x) => <span key={x} style={{ cursor: "pointer" }}>{x}</span>)}
