@@ -17,9 +17,24 @@ const T = {
 };
 
 const AUD = {
-  women: { label: "Women", accent: "#D99BAE", deep: "#8E4F63", tint: "#F8F0F3", line: "#F0DDE3" },
-  men:   { label: "Men",   accent: "#8FA5C2", deep: "#3F5878", tint: "#F1F4F8", line: "#DDE4EE" },
-  kids:  { label: "Kids",  accent: "#A6C299", deep: "#4C6B41", tint: "#F3F7F0", line: "#DFE9DA" },
+  women: {
+    label: "Women", accent: "#D99BAE", deep: "#8E4F63", tint: "#F8F0F3", line: "#F0DDE3",
+    heroLine1: "Dress for the occasion,", heroLine2: "borrow it from the neighbourhood.",
+    blurb: "Every piece here belongs to a shop or a person near you. Collect it yourself, or have it couriered both ways.",
+    rail: "Women's rail",
+  },
+  men: {
+    label: "Men", accent: "#8FA5C2", deep: "#3F5878", tint: "#F1F4F8", line: "#DDE4EE",
+    heroLine1: "Sharp for the occasion,", heroLine2: "rented from right next door.",
+    blurb: "Every piece here belongs to a shop or someone nearby. Pick it up yourself, or have it couriered both ways.",
+    rail: "Men's rail",
+  },
+  kids: {
+    label: "Kids", accent: "#A6C299", deep: "#4C6B41", tint: "#F3F7F0", line: "#DFE9DA",
+    heroLine1: "Outgrown by next season anyway,", heroLine2: "so borrow it instead.",
+    blurb: "Kids' clothes barely get worn before they're outgrown. Borrow what you need from a shop or family near you.",
+    rail: "Kids' rail",
+  },
 };
 
 const AREAS = ["Kothrud", "Baner", "Viman Nagar", "Koregaon Park", "Hadapsar", "Wakad", "Aundh", "Kharadi"];
@@ -597,6 +612,173 @@ function MyListings({ items, loading, error, onRetry, onRemove, removingId }) {
   );
 }
 
+/* Server dates come back as ISO datetimes at UTC midnight for a given
+   calendar day. Re-anchoring to local midnight via the date substring avoids
+   the day rolling back a day in timezones behind UTC. */
+const dateFromApi = (val) => new Date(`${String(val).slice(0, 10)}T00:00:00`);
+
+const BOOKING_STATUS = {
+  requested: { text: "Awaiting response", color: "#8E6F1C" },
+  accepted: { text: "Accepted", color: T.ok },
+  declined: { text: "Declined", color: T.err },
+  cancelled: { text: "Cancelled", color: T.ink3 },
+};
+
+function StatusPill({ status }) {
+  const s = BOOKING_STATUS[status] || { text: status, color: T.ink3 };
+  return (
+    <span style={{ fontSize: 11, letterSpacing: ".04em", fontWeight: 600, color: s.color, border: `1px solid ${s.color}`, padding: "3px 9px", borderRadius: 999 }}>
+      {s.text}
+    </span>
+  );
+}
+
+/* ---------------- My bookings ----------------
+   Requests this user has sent, from GET /api/v1/bookings/mine. The lender's
+   contact details only mean anything once they've accepted — while a
+   request is pending or after it's declined/cancelled, that block is
+   skipped rather than shown empty. */
+function MyBookings({ items, loading, error, onRetry, onCancel, cancellingId }) {
+  return (
+    <div className="cs-container" style={{ maxWidth: 900, margin: "0 auto", padding: "56px 32px 88px" }}>
+      <p style={{ ...label, marginBottom: 16 }}>{items.length} request{items.length === 1 ? "" : "s"} you've sent</p>
+      <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(30px,4vw,46px)", letterSpacing: "-.025em", margin: "0 0 34px" }}>
+        My bookings
+      </h1>
+
+      {loading ? (
+        <p style={{ fontSize: 14, color: T.ink2, padding: "40px 0" }}>Loading your bookings…</p>
+      ) : error ? (
+        <div style={{ border: `1px dashed ${T.err}`, borderRadius: 4, padding: "32px", textAlign: "center" }}>
+          <p style={{ fontSize: 14, color: T.err, margin: "0 0 14px" }}>{error}</p>
+          <button onClick={onRetry} style={{ fontFamily: "Karla, sans-serif", fontSize: 13, padding: "10px 18px", border: "none", background: T.ink, color: T.paper, borderRadius: 3, cursor: "pointer" }}>
+            Try again
+          </button>
+        </div>
+      ) : items.length ? (
+        <div style={{ display: "grid", gap: 16 }}>
+          {items.map((b) => {
+            const theme = AUD[b.listing?.category] || AUD.women;
+            const cancelling = cancellingId === b._id;
+            const canCancel = b.status === "requested" || b.status === "accepted";
+            return (
+              <article key={b._id} style={{ display: "flex", gap: 18, background: T.card, border: `1px solid ${T.line}`, borderRadius: 4, padding: 18 }}>
+                <div style={{ width: 84, height: 108, flexShrink: 0, borderRadius: 3, background: theme.tint, overflow: "hidden" }}>
+                  {b.listing?.img && <img src={b.listing.img} alt={b.listing.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
+                    <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 400, fontSize: 18, margin: 0 }}>{b.listing?.name || "Listing removed"}</h3>
+                    <StatusPill status={b.status} />
+                  </div>
+                  <p style={{ fontSize: 13, color: T.ink2, margin: "0 0 4px" }}>
+                    {formatDateRange(dateFromApi(b.fromDate), dateFromApi(b.toDate))} · size {b.size} · {b.handoff === "Courier" ? "Couriered" : "Collect"}
+                  </p>
+                  <p style={{ fontSize: 13, color: T.ink3, margin: "0 0 10px" }}>{inr(b.total)} total</p>
+
+                  {b.status === "accepted" && b.ownerInfo && (
+                    <div style={{ borderTop: `1px solid ${T.line2}`, paddingTop: 10, marginBottom: canCancel ? 10 : 0 }}>
+                      <p style={{ ...label, marginBottom: 6 }}>Lender's contact</p>
+                      <p style={{ fontSize: 13, color: T.ink2, margin: "0 0 2px" }}>{b.ownerInfo.username} · {b.ownerInfo.contactNumber}</p>
+                      <p style={{ fontSize: 13, color: T.ink2, margin: 0 }}>{b.ownerInfo.address}</p>
+                    </div>
+                  )}
+
+                  {canCancel && (
+                    <button onClick={() => onCancel(b._id)} disabled={cancelling}
+                      style={{ marginTop: 4, fontFamily: "Karla, sans-serif", fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: 3, cursor: cancelling ? "default" : "pointer", border: `1px solid ${T.line}`, background: "transparent", color: T.err, opacity: cancelling ? 0.6 : 1 }}>
+                      {cancelling ? "Cancelling…" : "Cancel booking"}
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ border: `1px dashed ${T.line}`, borderRadius: 4, padding: "56px 32px", textAlign: "center" }}>
+          <p style={{ fontFamily: "Fraunces, serif", fontSize: 21, margin: "0 0 8px" }}>No bookings yet</p>
+          <p style={{ fontSize: 14, color: T.ink2, margin: 0, maxWidth: 380, marginInline: "auto", lineHeight: 1.6 }}>
+            Requests you send from a listing will show up here.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Requests ----------------
+   Booking requests this user has received as a lender, from GET
+   /api/v1/bookings/received. Accepting or declining calls PATCH
+   /api/v1/bookings/:id/accept|decline — the only place either happens. */
+function Requests({ items, loading, error, onRetry, onAccept, onDecline, actingId }) {
+  return (
+    <div className="cs-container" style={{ maxWidth: 900, margin: "0 auto", padding: "56px 32px 88px" }}>
+      <p style={{ ...label, marginBottom: 16 }}>{items.length} request{items.length === 1 ? "" : "s"} on your listings</p>
+      <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(30px,4vw,46px)", letterSpacing: "-.025em", margin: "0 0 34px" }}>
+        Requests
+      </h1>
+
+      {loading ? (
+        <p style={{ fontSize: 14, color: T.ink2, padding: "40px 0" }}>Loading requests…</p>
+      ) : error ? (
+        <div style={{ border: `1px dashed ${T.err}`, borderRadius: 4, padding: "32px", textAlign: "center" }}>
+          <p style={{ fontSize: 14, color: T.err, margin: "0 0 14px" }}>{error}</p>
+          <button onClick={onRetry} style={{ fontFamily: "Karla, sans-serif", fontSize: 13, padding: "10px 18px", border: "none", background: T.ink, color: T.paper, borderRadius: 3, cursor: "pointer" }}>
+            Try again
+          </button>
+        </div>
+      ) : items.length ? (
+        <div style={{ display: "grid", gap: 16 }}>
+          {items.map((b) => {
+            const theme = AUD[b.listing?.category] || AUD.women;
+            const acting = actingId === b._id;
+            return (
+              <article key={b._id} style={{ display: "flex", gap: 18, background: T.card, border: `1px solid ${T.line}`, borderRadius: 4, padding: 18 }}>
+                <div style={{ width: 84, height: 108, flexShrink: 0, borderRadius: 3, background: theme.tint, overflow: "hidden" }}>
+                  {b.listing?.img && <img src={b.listing.img} alt={b.listing.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
+                    <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 400, fontSize: 18, margin: 0 }}>{b.listing?.name || "Listing removed"}</h3>
+                    <StatusPill status={b.status} />
+                  </div>
+                  <p style={{ fontSize: 13, color: T.ink2, margin: "0 0 4px" }}>
+                    From {b.renterInfo?.username || "a renter"} · {formatDateRange(dateFromApi(b.fromDate), dateFromApi(b.toDate))} · size {b.size}
+                  </p>
+                  <p style={{ fontSize: 13, color: T.ink3, margin: "0 0 12px" }}>
+                    {b.handoff === "Courier" ? "Couriered" : "Collect"} · {inr(b.total)} total
+                  </p>
+
+                  {b.status === "requested" && (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button onClick={() => onAccept(b._id)} disabled={acting}
+                        style={{ fontFamily: "Karla, sans-serif", fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: 3, cursor: acting ? "default" : "pointer", border: "none", background: T.ink, color: T.paper, opacity: acting ? 0.6 : 1 }}>
+                        {acting ? "Working…" : "Accept"}
+                      </button>
+                      <button onClick={() => onDecline(b._id)} disabled={acting}
+                        style={{ fontFamily: "Karla, sans-serif", fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: 3, cursor: acting ? "default" : "pointer", border: `1px solid ${T.line}`, background: "transparent", color: T.err, opacity: acting ? 0.6 : 1 }}>
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ border: `1px dashed ${T.line}`, borderRadius: 4, padding: "56px 32px", textAlign: "center" }}>
+          <p style={{ fontFamily: "Fraunces, serif", fontSize: 21, margin: "0 0 8px" }}>No requests yet</p>
+          <p style={{ fontSize: 14, color: T.ink2, margin: 0, maxWidth: 380, marginInline: "auto", lineHeight: 1.6 }}>
+            When someone asks to rent one of your pieces, it'll show up here.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AuthField({ id, lb, hint, error, children }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -785,6 +967,14 @@ export default function ClosetSwap() {
   const [myListingsLoading, setMyListingsLoading] = useState(false);
   const [myListingsError, setMyListingsError] = useState("");
   const [removingId, setRemovingId] = useState(null);
+  const [myBookings, setMyBookings] = useState([]);
+  const [myBookingsLoading, setMyBookingsLoading] = useState(false);
+  const [myBookingsError, setMyBookingsError] = useState("");
+  const [cancellingId, setCancellingId] = useState(null);
+  const [receivedBookings, setReceivedBookings] = useState([]);
+  const [receivedBookingsLoading, setReceivedBookingsLoading] = useState(false);
+  const [receivedBookingsError, setReceivedBookingsError] = useState("");
+  const [actingBookingId, setActingBookingId] = useState(null);
 
   const theme = AUD[aud];
   const switchAud = (k) => { setAud(k); setGarment(null); };
@@ -843,6 +1033,65 @@ export default function ClosetSwap() {
     }
   };
 
+  const loadMyBookings = useCallback(async () => {
+    if (!user) { setMyBookings([]); return; }
+    setMyBookingsLoading(true);
+    setMyBookingsError("");
+    try {
+      setMyBookings(await api.fetchMyBookings());
+    } catch (error) {
+      setMyBookingsError("Couldn't load your bookings — is the backend running?");
+    } finally {
+      setMyBookingsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (view === "mybookings" && user) loadMyBookings();
+  }, [view, user, loadMyBookings]);
+
+  const cancelMyBooking = async (id) => {
+    if (!window.confirm("Cancel this booking?")) return;
+    setCancellingId(id);
+    try {
+      const updated = await api.cancelBooking(id);
+      setMyBookings((list) => list.map((b) => (b._id === id ? { ...b, status: updated.status } : b)));
+    } catch (error) {
+      setMyBookingsError(error.response?.data?.message || "Couldn't cancel that booking, please try again.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const loadReceivedBookings = useCallback(async () => {
+    if (!user) { setReceivedBookings([]); return; }
+    setReceivedBookingsLoading(true);
+    setReceivedBookingsError("");
+    try {
+      setReceivedBookings(await api.fetchReceivedBookings());
+    } catch (error) {
+      setReceivedBookingsError("Couldn't load your requests — is the backend running?");
+    } finally {
+      setReceivedBookingsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (view === "requests" && user) loadReceivedBookings();
+  }, [view, user, loadReceivedBookings]);
+
+  const respondToRequest = async (id, action) => {
+    setActingBookingId(id);
+    try {
+      const updated = action === "accept" ? await api.acceptBooking(id) : await api.declineBooking(id);
+      setReceivedBookings((list) => list.map((b) => (b._id === id ? { ...b, status: updated.status } : b)));
+    } catch (error) {
+      setReceivedBookingsError(error.response?.data?.message || "Couldn't update that request, please try again.");
+    } finally {
+      setActingBookingId(null);
+    }
+  };
+
   const toggle = async (id) => {
     if (!user) { goToAuth("login"); return; }
     const wasLiked = liked.includes(id);
@@ -860,7 +1109,9 @@ export default function ClosetSwap() {
     setLiked([]);
     setSavedOnly(false);
     setMyListings([]);
-    if (view === "mylistings") setView("browse");
+    setMyBookings([]);
+    setReceivedBookings([]);
+    if (view === "mylistings" || view === "mybookings" || view === "requests") setView("browse");
   };
 
   const garmentOptions = useMemo(() => (
@@ -892,7 +1143,11 @@ export default function ClosetSwap() {
         @media(max-width:900px){.cs-shell{grid-template-columns:1fr;gap:26px}
           .cs-auth{grid-template-columns:1fr!important}
           .cs-auth aside{border-right:none!important;border-bottom:1px solid ${T.line};padding:28px 24px!important}
-          .cs-auth main{padding:34px 24px!important}}
+          .cs-auth main{padding:34px 24px!important}
+          .cs-distance{display:none}
+          .cs-garment-list{display:flex!important;flex-wrap:wrap;gap:8px!important}
+          .cs-garment-list button{border:1px solid ${T.line};border-radius:999px;padding:7px 14px!important;text-align:center!important}
+        }
         @media(max-width:760px){
           .cs-header-inner{padding:0 18px!important;gap:12px!important}
           .cs-menu-toggle{display:inline-flex!important}
@@ -915,7 +1170,7 @@ export default function ClosetSwap() {
 
       {/* Header */}
       <header ref={headerRef} style={{ position: "sticky", top: 0, zIndex: 30, background: "rgba(251,250,248,.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.line}` }}>
-        <div className="cs-header-inner" style={{ maxWidth: 1220, margin: "0 auto", padding: "0 32px", height: 70, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap", position: "relative" }}>
+        <div className="cs-header-inner" style={{ maxWidth: 1220, margin: "0 auto", padding: "14px 32px", minHeight: 70, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap", position: "relative" }}>
           <button onClick={() => { setView("browse"); setMenuOpen(false); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
             <Wordmark accent={theme.accent} />
           </button>
@@ -960,6 +1215,8 @@ export default function ClosetSwap() {
             <nav className="cs-nav" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: T.ink2 }}>
               <button onClick={() => { setView("lend"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "lend" ? T.ink : T.ink2, cursor: "pointer" }}>Lend yours</button>
               <button onClick={() => { user ? setView("mylistings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mylistings" ? T.ink : T.ink2, cursor: "pointer" }}>My listings</button>
+              <button onClick={() => { user ? setView("requests") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "requests" ? T.ink : T.ink2, cursor: "pointer" }}>Requests</button>
+              <button onClick={() => { user ? setView("mybookings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mybookings" ? T.ink : T.ink2, cursor: "pointer" }}>My bookings</button>
               <span onClick={() => { user ? setSavedOnly((s) => !s) : goToAuth("login"); setMenuOpen(false); }}
                 style={{ cursor: "pointer", color: savedOnly ? theme.deep : T.ink2, fontWeight: savedOnly ? 600 : 400 }}>
                 Saved {liked.length > 0 && <b style={{ color: theme.deep }}>({liked.length})</b>}
@@ -1000,16 +1257,45 @@ export default function ClosetSwap() {
         )
       )}
 
+      {view === "mybookings" && (
+        user ? (
+          <MyBookings items={myBookings} loading={myBookingsLoading} error={myBookingsError} onRetry={loadMyBookings} onCancel={cancelMyBooking} cancellingId={cancellingId} />
+        ) : (
+          <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
+            <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your bookings</p>
+            <button onClick={() => goToAuth("login")}
+              style={{ fontFamily: "Karla, sans-serif", fontSize: 14, fontWeight: 500, padding: "12px 22px", border: "none", borderRadius: 3, background: T.ink, color: T.paper, cursor: "pointer" }}>
+              Log in or sign up
+            </button>
+          </div>
+        )
+      )}
+
+      {view === "requests" && (
+        user ? (
+          <Requests items={receivedBookings} loading={receivedBookingsLoading} error={receivedBookingsError} onRetry={loadReceivedBookings}
+            onAccept={(id) => respondToRequest(id, "accept")} onDecline={(id) => respondToRequest(id, "decline")} actingId={actingBookingId} />
+        ) : (
+          <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
+            <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your requests</p>
+            <button onClick={() => goToAuth("login")}
+              style={{ fontFamily: "Karla, sans-serif", fontSize: 14, fontWeight: 500, padding: "12px 22px", border: "none", borderRadius: 3, background: T.ink, color: T.paper, cursor: "pointer" }}>
+              Log in or sign up
+            </button>
+          </div>
+        )
+      )}
+
       {view === "browse" && (
         <>
           {/* Hero */}
           <section className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 34px" }}>
             <p style={{ ...label, marginBottom: 16 }}>{results.length} pieces within {radius} km of {area || "you"}</p>
             <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: "clamp(34px,4.6vw,58px)", lineHeight: 1.04, letterSpacing: "-.025em", margin: 0, maxWidth: 720 }}>
-              Dress for the occasion,<br /><em style={{ fontStyle: "italic", color: theme.deep }}>borrow it from the neighbourhood.</em>
+              {theme.heroLine1}<br /><em style={{ fontStyle: "italic", color: theme.deep }}>{theme.heroLine2}</em>
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.6, color: T.ink2, maxWidth: 480, margin: "22px 0 0" }}>
-              Every piece here belongs to a shop or a person near you. Collect it yourself, or have it couriered both ways.
+              {theme.blurb}
             </p>
           </section>
 
@@ -1020,7 +1306,7 @@ export default function ClosetSwap() {
                 {garmentOptions.length > 0 && (
                   <>
                     <p style={{ ...label, marginBottom: 12 }}>Garment</p>
-                    <div style={{ display: "grid", gap: 2, marginBottom: 28 }}>
+                    <div className="cs-garment-list" style={{ display: "grid", gap: 2, marginBottom: 28 }}>
                       {garmentOptions.map((g) => (
                         <button key={g} onClick={() => setGarment(garment === g ? null : g)}
                           style={{ fontFamily: "Karla, sans-serif", textAlign: "left", fontSize: 14, padding: "8px 10px", border: "none", cursor: "pointer", borderRadius: 3,
@@ -1032,17 +1318,19 @@ export default function ClosetSwap() {
                   </>
                 )}
 
-                <p style={{ ...label, marginBottom: 10 }}>Distance</p>
-                <input type="range" min="2" max="25" value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: "100%", accentColor: theme.deep }} aria-label="Search radius in kilometres" />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: T.ink3, marginTop: 4 }}>
-                  <span>2 km</span><span>{radius} km</span><span>25 km</span>
+                <div className="cs-distance">
+                  <p style={{ ...label, marginBottom: 10 }}>Distance</p>
+                  <input type="range" min="2" max="25" value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: "100%", accentColor: theme.deep }} aria-label="Search radius in kilometres" />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: T.ink3, marginTop: 4 }}>
+                    <span>2 km</span><span>{radius} km</span><span>25 km</span>
+                  </div>
                 </div>
               </aside>
 
               <div>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 22, paddingBottom: 16, borderBottom: `1px solid ${T.line}` }}>
                   <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 400, fontSize: 24, margin: 0 }}>
-                    {garment || `${theme.label}'s rail`}
+                    {garment || theme.rail}
                   </h2>
                   <span style={{ fontSize: 13, color: T.ink3 }}>{results.length} nearby · {formatDateRange(dateFrom, dateTo)}</span>
                 </div>

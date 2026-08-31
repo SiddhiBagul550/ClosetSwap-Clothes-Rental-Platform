@@ -91,4 +91,43 @@ export async function toggleLike(userId, productId) {
   return data.likeditems;
 }
 
+export async function fetchAvailability(productId) {
+  const { data } = await api.get(`/bookings/availability/${productId}`);
+  return data.data; // { units, bookings }
+}
+
+export async function createBooking(payload) {
+  try {
+    const { data } = await api.post("/bookings", payload);
+    return data.data.booking;
+  } catch (error) {
+    throw new Error(errMessage(error, "Couldn't send that request, please try again."));
+  }
+}
+
+export async function fetchMyBookings() {
+  const { data } = await api.get("/bookings/mine");
+  return data.data.bookings;
+}
+
+export async function fetchReceivedBookings() {
+  const { data } = await api.get("/bookings/received");
+  return data.data.bookings;
+}
+
+export async function acceptBooking(id) {
+  const { data } = await api.patch(`/bookings/${id}/accept`);
+  return data.data.booking;
+}
+
+export async function declineBooking(id) {
+  const { data } = await api.patch(`/bookings/${id}/decline`);
+  return data.data.booking;
+}
+
+export async function cancelBooking(id) {
+  const { data } = await api.patch(`/bookings/${id}/cancel`);
+  return data.data.booking;
+}
+
 export default api;

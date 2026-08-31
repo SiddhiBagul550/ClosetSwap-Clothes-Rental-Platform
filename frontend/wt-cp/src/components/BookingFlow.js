@@ -1,10 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
+import * as api from "../api";
 
 /* ============================================================
    Closet Swap — booking flow
-   Dates → handoff → review → outcome.
-   Shop listings confirm instantly; individual listings send a
-   request the lender must accept, and stay anonymous till then.
+   Dates → handoff → review → request sent.
+   Availability comes from GET /bookings/availability/:productId and
+   submitting posts a real request to POST /bookings — the lender accepts
+   or declines it later from the "Requests" screen. Every listing here is an
+   individual (the backend has no shop-account concept yet), so requests
+   always need the lender's yes; the isShop branches below are dead for now
+   but kept generic in case that ever changes.
    ============================================================ */
 
 const T = {
@@ -17,18 +22,31 @@ const COURIER = 120;
 const label = { fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: T.ink3, fontWeight: 500 };
 const inr = (n) => "₹" + n.toLocaleString("en-IN");
 
-const iso = (d) => d.toISOString().slice(0, 10);
+/* Local calendar-day key, deliberately not UTC-based (toISOString would shift
+   the date whenever the browser's timezone isn't UTC). Used both for the
+   calendar's own day cells and for turning /bookings/availability's dates
+   back into keys, so the two always agree on what "day" means. */
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const toLocalDate = (val) => new Date(`${String(val).slice(0, 10)}T00:00:00`);
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 const fmt = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 const nights = (a, b) => Math.round((b - a) / 86400000);
 
-/* Existing listings only record which day-offsets (0-13) are taken, not real
-   dates or per-day counts. Anchor those offsets to today so the calendar has
-   something real to show. */
-function bookedMap(listing, today) {
+/* Turns the active (requested/accepted) bookings from GET
+   /bookings/availability/:productId into a day -> occupied-units map. A
+   single-unit piece's cleaning-turnaround day isn't stored explicitly — it
+   falls out of dayState() below noticing the previous day was occupied. */
+function bookedMapFromBookings(bookings) {
   const map = {};
-  (listing.booked || []).forEach((offset) => { map[iso(addDays(today, offset))] = 1; });
+  (bookings || []).forEach((b) => {
+    const start = toLocalDate(b.fromDate);
+    const end = toLocalDate(b.toDate);
+    for (let d = new Date(start); d < end; d = addDays(d, 1)) {
+      const key = iso(d);
+      map[key] = (map[key] || 0) + 1;
+    }
+  });
   return map;
 }
 
@@ -126,16 +144,29 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [size, setSize] = useState(null);
   const [err, setErr] = useState("");
-  const [outcome, setOutcome] = useState(null);   // 'confirmed' | 'requested' | 'accepted'
+  const [submitting, setSubmitting] = useState(false);
+  const [availability, setAvailability] = useState(null); // { units, bookings } | null while loading
+  const [availabilityError, setAvailabilityError] = useState("");
 
   const isShop = listing.lender.type === "shop";
+  const units = availability?.units ?? listing.units;
   const baseDays = listing.baseDays ?? listing.days;
-  const minDays = listing.minDays ?? (listing.units === 1 ? 3 : 2);
+  const minDays = listing.minDays ?? (units === 1 ? 3 : 2);
   const extraDay = listing.extraDay ?? Math.round((listing.rent / baseDays) * 0.3 / 10) * 10;
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
-  const booked = useMemo(() => bookedMap(listing, today), [listing, today]);
+  const booked = useMemo(() => bookedMapFromBookings(availability?.bookings), [availability]);
   const minStart = addDays(today, leadDays(handoff || (listing.handoff.includes("Courier") ? "Courier" : "Collect")));
+
+  useEffect(() => {
+    let cancelled = false;
+    setAvailability(null);
+    setAvailabilityError("");
+    api.fetchAvailability(listing.id)
+      .then((data) => { if (!cancelled) setAvailability(data); })
+      .catch(() => { if (!cancelled) setAvailabilityError("Couldn't load availability for this piece — is the backend running?"); });
+    return () => { cancelled = true; };
+  }, [listing.id]);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -149,7 +180,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
     if (d <= from) { setFrom(d); return; }
     // no blocked day may sit inside the range
     for (let x = new Date(from); x <= d; x = addDays(x, 1)) {
-      const st = dayState(booked, listing.units, x);
+      const st = dayState(booked, units, x);
       if (st === "full" || st === "turnaround") { setErr("That stretch runs into days the piece isn't free. Pick a shorter range."); return; }
     }
     if (nights(from, d) < minDays) { setErr(`This lender's minimum is ${minDays} days.`); return; }
@@ -161,10 +192,9 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
   const rent = listing.rent + extra * extraDay;
   const courier = handoff === "Courier" ? COURIER : 0;
   const deposit = listing.deposit || 0;
-  const dueNow = isShop ? rent + courier + deposit : 0;
   const total = rent + courier + deposit;
 
-  const next = () => {
+  const next = async () => {
     if (step === 1) {
       if (!from || !to) return setErr("Pick a pick-up and a return day.");
       if (!size) return setErr("Choose a size.");
@@ -179,7 +209,23 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
     }
     if (step === 3) {
       if (!user) { onNeedLogin(); return; }
-      setOutcome(isShop ? "confirmed" : "requested"); setStep(4);
+      setErr("");
+      setSubmitting(true);
+      try {
+        await api.createBooking({
+          productId: listing.id,
+          fromDate: iso(from),
+          toDate: iso(to),
+          size,
+          handoff,
+          deliveryAddress: handoff === "Courier" ? deliveryAddress : undefined,
+        });
+        setStep(4);
+      } catch (error) {
+        setErr(error.message);
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -196,10 +242,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
     </div>
   );
 
-  const address = listing.lender.address || (isShop ? `${listing.area}, Pune` : `${listing.area} — full address shared after confirmation`);
-  const hours = listing.lender.hours || (isShop ? "10:30 – 8:30, most days" : "Usually free evenings — timing arranged in chat");
-  const phone = listing.lender.phone || "+91 9••• •••••";
-  const lenderDisplayName = isShop ? listing.lender.name : (listing.lender.name || "Individual lender");
+  const hours = listing.lender.hours || (isShop ? "10:30 – 8:30, most days" : "arrange a time in chat once confirmed");
 
   return (
     <div role="dialog" aria-modal="true" aria-label={`Book ${listing.name}`} className="csbk-backdrop"
@@ -257,15 +300,15 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
                 <>
                   <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 28, letterSpacing: "-.02em", margin: "0 0 8px" }}>When do you need it?</h1>
                   <p style={{ fontSize: 14, color: T.ink2, margin: "0 0 24px", maxWidth: 480, lineHeight: 1.6 }}>
-                    {listing.units === 1
+                    {availabilityError ? availabilityError : units === 1
                       ? "This is a one-off piece, so the day after each rental is blocked for cleaning."
-                      : `This lender holds ${listing.units} identical units, so part-booked days are still available.`}
+                      : `This lender holds ${units} identical units, so part-booked days are still available.`}
                     {" "}Minimum {minDays} days.
                   </p>
 
                   <div className="csbk-cal" style={{ marginBottom: 20 }}>
-                    <Month year={today.getFullYear()} month={today.getMonth()} booked={booked} units={listing.units} from={from} to={to} onPick={pick} minStart={minStart} theme={theme} />
-                    <Month year={addMonths(today, 1).getFullYear()} month={addMonths(today, 1).getMonth()} booked={booked} units={listing.units} from={from} to={to} onPick={pick} minStart={minStart} theme={theme} />
+                    <Month year={today.getFullYear()} month={today.getMonth()} booked={booked} units={units} from={from} to={to} onPick={pick} minStart={minStart} theme={theme} />
+                    <Month year={addMonths(today, 1).getFullYear()} month={addMonths(today, 1).getMonth()} booked={booked} units={units} from={from} to={to} onPick={pick} minStart={minStart} theme={theme} />
                   </div>
 
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, color: T.ink2, borderTop: `1px solid ${T.line}`, paddingTop: 16, marginBottom: 24 }}>
@@ -383,72 +426,29 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
               {step === 4 && (
                 <div style={{ maxWidth: 600 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                    <Tick c={outcome === "requested" ? theme.deep : T.ok} s={22} />
-                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 28, letterSpacing: "-.02em", margin: 0 }}>
-                      {outcome === "requested" ? "Request sent" : "Booked"}
-                    </h1>
+                    <Tick c={theme.deep} s={22} />
+                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 28, letterSpacing: "-.02em", margin: 0 }}>Request sent</h1>
                   </div>
 
-                  {outcome === "requested" ? (
-                    <>
-                      <p style={{ fontSize: 15, color: T.ink2, lineHeight: 1.65, margin: "0 0 24px" }}>
-                        The lender has until {fmt(addDays(today, 1))}, 6am to accept. We'll text you either way. Nothing has been charged.
-                      </p>
-                      <div style={{ border: `1px solid ${T.line}`, borderRadius: 4, padding: "20px 22px", background: T.card, marginBottom: 18 }}>
-                        <p style={{ ...label, marginBottom: 12 }}>Waiting on</p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                          <Tick c={T.ink3} s={16} />
-                          <span style={{ fontSize: 15 }}>Verified lender</span>
-                          <span style={{ ...label, border: `1px solid ${T.line}`, padding: "3px 7px", borderRadius: 2 }}>Individual</span>
-                        </div>
-                        <p style={{ fontSize: 13, color: T.ink2, margin: "10px 0 0" }}>
-                          {listing.lender.rating != null ? `${listing.lender.rating.toFixed(1)}★ · ${listing.lender.rentals} rentals` : "New lender"}
-                          {listing.hasLocation ? ` · ${listing.area}, ${listing.km} km away` : ""}
-                        </p>
-                        <p style={{ fontSize: 12, color: T.ink3, margin: "12px 0 0", paddingTop: 12, borderTop: `1px solid ${T.line2}`, lineHeight: 1.6 }}>
-                          Their name, phone and address stay hidden until they accept. Same the other way — they only see your first name until then.
-                        </p>
-                      </div>
-                      <button onClick={() => setOutcome("accepted")} style={btn(false)}>Simulate the lender accepting</button>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 15, color: T.ink2, lineHeight: 1.65, margin: "0 0 24px" }}>
-                        {handoff === "Courier"
-                          ? `It arrives on the morning of ${fmt(from)}. We'll collect it from your door on ${fmt(addDays(to, 1))}.`
-                          : `Collect it on ${fmt(from)} and bring it back by ${fmt(to)}.`}
-                      </p>
-
-                      <div style={{ border: `1px solid ${T.line}`, borderRadius: 4, padding: "20px 22px", background: T.card, marginBottom: 18 }}>
-                        <p style={{ ...label, marginBottom: 12 }}>
-                          {outcome === "accepted" ? "Your lender — details unlocked" : "Your lender"}
-                        </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
-                          <Tick s={16} />
-                          <span style={{ fontSize: 15, fontWeight: 500 }}>{lenderDisplayName}</span>
-                          <span style={{ ...label, border: `1px solid ${T.line}`, padding: "3px 7px", borderRadius: 2 }}>
-                            {isShop ? "Rental shop" : "Individual"}
-                          </span>
-                        </div>
-                        {[["Where", address], ["When", hours], ["Phone", phone]].map(([k, v]) => (
-                          <div key={k} style={{ display: "flex", gap: 16, padding: "7px 0" }}>
-                            <span style={{ ...label, width: 60, flexShrink: 0, paddingTop: 2 }}>{k}</span>
-                            <span style={{ fontSize: 14, color: T.ink2 }}>{v}</span>
-                          </div>
-                        ))}
-                        {outcome === "accepted" && (
-                          <p style={{ fontSize: 12, color: T.ink3, margin: "12px 0 0", paddingTop: 12, borderTop: `1px solid ${T.line2}`, lineHeight: 1.6 }}>
-                            Shared with you only, for this rental. The number is masked — calls route through us and stop working a day after the return.
-                          </p>
-                        )}
-                      </div>
-
-                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                        <button style={btn(true)}>Message the lender</button>
-                        <button style={btn(false)}>Add to calendar</button>
-                      </div>
-                    </>
-                  )}
+                  <p style={{ fontSize: 15, color: T.ink2, lineHeight: 1.65, margin: "0 0 24px" }}>
+                    The lender has been notified. Nothing has been charged — check <b>My bookings</b> to see when they respond.
+                  </p>
+                  <div style={{ border: `1px solid ${T.line}`, borderRadius: 4, padding: "20px 22px", background: T.card, marginBottom: 18 }}>
+                    <p style={{ ...label, marginBottom: 12 }}>Waiting on</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                      <Tick c={T.ink3} s={16} />
+                      <span style={{ fontSize: 15 }}>Verified lender</span>
+                      <span style={{ ...label, border: `1px solid ${T.line}`, padding: "3px 7px", borderRadius: 2 }}>Individual</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: T.ink2, margin: "10px 0 0" }}>
+                      {listing.lender.rating != null ? `${listing.lender.rating.toFixed(1)}★ · ${listing.lender.rentals} rentals` : "New lender"}
+                      {listing.hasLocation ? ` · ${listing.area}, ${listing.km} km away` : ""}
+                    </p>
+                    <p style={{ fontSize: 12, color: T.ink3, margin: "12px 0 0", paddingTop: 12, borderTop: `1px solid ${T.line2}`, lineHeight: 1.6 }}>
+                      Their name, phone and address stay hidden until they accept.
+                    </p>
+                  </div>
+                  <button onClick={onClose} style={btn(true)}>Done</button>
                 </div>
               )}
 
@@ -459,8 +459,8 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
               {step < 4 && (
                 <div className="csbk-actions" style={{ display: "flex", gap: 10, marginTop: 30, borderTop: `1px solid ${T.line}`, paddingTop: 24 }}>
                   {step > 1 && <button onClick={() => { setStep(step - 1); setErr(""); }} style={btn(false)}>Back</button>}
-                  <button onClick={next} style={btn(true)}>
-                    {step === 3 ? (isShop ? `Pay ${inr(dueNow)} and book` : "Send request") : "Continue"}
+                  <button onClick={next} disabled={submitting} style={{ ...btn(true), opacity: submitting ? 0.7 : 1, cursor: submitting ? "default" : "pointer" }}>
+                    {step === 3 ? (submitting ? "Sending…" : "Send request") : "Continue"}
                   </button>
                 </div>
               )}
