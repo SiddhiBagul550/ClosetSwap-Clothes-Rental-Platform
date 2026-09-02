@@ -72,6 +72,17 @@ const productSchema = new mongoose.Schema({
     },
   },
 
+  min_days: {
+    type: String,
+    default: "1",
+    validate: {
+      validator: function (val) {
+        return Number(val) >= 1;
+      },
+      message: "Minimum rental days must be at least 1",
+    },
+  },
+
   area: {
     type: String,
     enum: [

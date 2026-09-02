@@ -8,6 +8,12 @@ export const T = {
 };
 
 export const AUD = {
+  all: {
+    label: "All", accent: "#B8AFC7", deep: "#453F52", tint: "#F1EFF4", line: "#E6E2EC",
+    heroLine1: "Dress for the occasion,", heroLine2: "borrow it from the neighbourhood.",
+    blurb: "Every piece here belongs to a shop or a person near you. Collect it yourself, or have it couriered both ways.",
+    rail: "New arrivals",
+  },
   women: {
     label: "Women", accent: "#D99BAE", deep: "#8E4F63", tint: "#F8F0F3", line: "#F0DDE3",
     heroLine1: "Dress for the occasion,", heroLine2: "borrow it from the neighbourhood.",

@@ -36,11 +36,9 @@ const fmt = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short
 const nights = (a, b) => Math.round((b - a) / 86400000);
 
 /* Turns GET /bookings/availability/:productId into a day -> occupied-units
-   map. A single-unit piece's cleaning-turnaround day isn't stored explicitly
-   — it falls out of dayState() below noticing the previous day was occupied.
-   The owner's own blackout ranges (blockedDates) are folded in here too,
-   marked as occupying every unit since they're a hard block regardless of
-   how many identical units exist. */
+   map. The owner's own blackout ranges (blockedDates) are folded in here
+   too, marked as occupying every unit since they're a hard block regardless
+   of how many identical units exist. */
 function bookedMapFromAvailability(data, units) {
   const map = {};
   (data?.bookings || []).forEach((b) => {
@@ -61,16 +59,11 @@ function bookedMapFromAvailability(data, units) {
   return map;
 }
 
-/* A day is unusable when every unit is out, or when it's the turnaround day
-   after a single-unit booking — the piece is being cleaned. */
+/* A day is unusable when every unit is out. */
 function dayState(map, units, d) {
   const key = iso(d);
   const out = map[key] || 0;
   if (out >= units) return "full";
-  if (units === 1) {
-    const prev = map[iso(addDays(d, -1))] || 0;
-    if (prev >= 1) return "turnaround";
-  }
   if (out > 0) return "partial";
   return "free";
 }
@@ -115,7 +108,7 @@ function Month({ year, month, booked, units, from, to, onPick, minStart, theme }
           if (!d) return <span key={i} />;
           const st = dayState(booked, units, d);
           const tooSoon = d < minStart;
-          const dead = st === "full" || st === "turnaround" || tooSoon;
+          const dead = st === "full" || tooSoon;
           const inRange = from && to && d > from && d < to;
           const edge = (from && +d === +from) || (to && +d === +to);
 
@@ -127,7 +120,7 @@ function Month({ year, month, booked, units, from, to, onPick, minStart, theme }
 
           return (
             <button key={i} disabled={dead} onClick={() => onPick(d)}
-              title={st === "turnaround" ? "Cleaning turnaround" : st === "full" ? "Fully booked" : st === "partial" ? `${units - (booked[iso(d)] || 0)} of ${units} free` : tooSoon ? "Too soon for this handover" : "Available"}
+              title={st === "full" ? "Fully booked" : st === "partial" ? `${units - (booked[iso(d)] || 0)} of ${units} free` : tooSoon ? "Too soon for this handover" : "Available"}
               style={{
                 position: "relative", aspectRatio: "1", fontFamily: "Karla, sans-serif", fontSize: 13,
                 border: bd, borderRadius: 3, background: bg, color: col,
@@ -135,9 +128,6 @@ function Month({ year, month, booked, units, from, to, onPick, minStart, theme }
                 textDecoration: st === "full" ? "line-through" : "none",
               }}>
               {d.getDate()}
-              {st === "turnaround" && !tooSoon && (
-                <span aria-hidden="true" style={{ position: "absolute", bottom: 4, left: "50%", transform: "translateX(-50%)", width: 3, height: 3, borderRadius: "50%", background: T.ink3 }} />
-              )}
             </button>
           );
         })}
@@ -163,7 +153,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
   const isOwnListing = !!user && listing.owner === user.id;
   const units = availability?.units ?? listing.units;
   const baseDays = listing.baseDays ?? listing.days;
-  const minDays = listing.minDays ?? (units === 1 ? 3 : 2);
+  const minDays = listing.minDays ?? 1;
   const extraDay = listing.extraDay ?? Math.round((listing.rent / baseDays) * 0.3 / 10) * 10;
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
@@ -193,7 +183,7 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
     // no blocked day may sit inside the range
     for (let x = new Date(from); x <= d; x = addDays(x, 1)) {
       const st = dayState(booked, units, x);
-      if (st === "full" || st === "turnaround") { setErr("That stretch runs into days the piece isn't free. Pick a shorter range."); return; }
+      if (st === "full") { setErr("That stretch runs into days the piece isn't free. Pick a shorter range."); return; }
     }
     if (nights(from, d) < minDays) { setErr(`This lender's minimum is ${minDays} days.`); return; }
     setTo(d);
@@ -314,9 +304,9 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
                   <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 28, letterSpacing: "-.02em", margin: "0 0 8px" }}>When do you need it?</h1>
                   <p style={{ fontSize: 14, color: T.ink2, margin: "0 0 24px", maxWidth: 480, lineHeight: 1.6 }}>
                     {availabilityError ? availabilityError : units === 1
-                      ? "This is a one-off piece, so the day after each rental is blocked for cleaning."
+                      ? "This is a one-off piece."
                       : `This lender holds ${units} identical units, so part-booked days are still available.`}
-                    {" "}Minimum {minDays} days.
+                    {" "}Minimum {minDays} {minDays === 1 ? "day" : "days"}.
                   </p>
 
                   <div className="csbk-cal" style={{ marginBottom: 20 }}>
@@ -327,7 +317,6 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, color: T.ink2, borderTop: `1px solid ${T.line}`, paddingTop: 16, marginBottom: 24 }}>
                     <span style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: T.ink }} /> Your dates</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 2, border: `1px solid ${theme.line}` }} /> Part booked</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: T.line2, position: "relative" }}><span style={{ position: "absolute", bottom: 2, left: 4.5, width: 3, height: 3, borderRadius: "50%", background: T.ink3 }} /></span> Cleaning turnaround</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 7, opacity: .5 }}><s>12</s> Fully booked</span>
                   </div>
 

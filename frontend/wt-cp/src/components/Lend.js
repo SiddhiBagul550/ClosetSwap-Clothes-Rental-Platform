@@ -17,7 +17,7 @@ export default function Lend({ theme, user, onNeedLogin, onListed }) {
     ["Paid on return", "Money lands in your account after the piece comes back and passes inspection."],
   ];
 
-  const emptyForm = { name: "", category: "", sub_category: "", available_quantity: "1", size: "", cost_per_day: "", product_description: "", area: "", delivery_option: "" };
+  const emptyForm = { name: "", category: "", sub_category: "", available_quantity: "1", size: "", cost_per_day: "", min_days: "1", product_description: "", area: "", delivery_option: "" };
   const [form, setForm] = useState(emptyForm);
   const [img, setImg] = useState("");
   const [err, setErr] = useState("");
@@ -49,9 +49,13 @@ export default function Lend({ theme, user, onNeedLogin, onListed }) {
       setErr("Cost per day and quantity must be greater than 0.");
       return;
     }
+    if (form.min_days && Number(form.min_days) < 1) {
+      setErr("Minimum rental days must be at least 1.");
+      return;
+    }
     setSubmitting(true);
     try {
-      await api.createProduct({ ...form, img, owner: user.id });
+      await api.createProduct({ ...form, min_days: form.min_days || "1", img, owner: user.id });
       setForm(emptyForm);
       setImg("");
       setDone(true);
@@ -113,7 +117,7 @@ export default function Lend({ theme, user, onNeedLogin, onListed }) {
                 <label style={fieldLabel} htmlFor="ln-cat">Category</label>
                 <select id="ln-cat" name="category" value={form.category} onChange={change} style={inputStyle}>
                   <option value="">Choose</option>
-                  {Object.keys(AUD).map((k) => <option key={k} value={k}>{AUD[k].label}</option>)}
+                  {Object.keys(AUD).filter((k) => k !== "all").map((k) => <option key={k} value={k}>{AUD[k].label}</option>)}
                 </select>
               </div>
 
@@ -139,6 +143,11 @@ export default function Lend({ theme, user, onNeedLogin, onListed }) {
               <div>
                 <label style={fieldLabel} htmlFor="ln-cost">Cost per day (₹)</label>
                 <input id="ln-cost" name="cost_per_day" type="number" min="1" value={form.cost_per_day} onChange={change} style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={fieldLabel} htmlFor="ln-min-days">Minimum rental days (optional)</label>
+                <input id="ln-min-days" name="min_days" type="number" min="1" placeholder="1" value={form.min_days} onChange={change} style={inputStyle} />
               </div>
 
               <div>

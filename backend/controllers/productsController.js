@@ -15,6 +15,7 @@ const UPDATABLE_FIELDS = [
   "available_quantity",
   "size",
   "cost_per_day",
+  "min_days",
   "area",
   "product_description",
   "delivery_option",

@@ -51,7 +51,7 @@ export default function ClosetSwap() {
   const [mode, setMode] = useState("login");
   const [area, setArea] = useState("");
   const [radius, setRadius] = useState(10);
-  const [aud, setAud] = useState("women");
+  const [aud, setAud] = useState("all");
   const [garment, setGarment] = useState(null);
   const [savedOnly, setSavedOnly] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -121,9 +121,16 @@ export default function ClosetSwap() {
 
     api.verifyEmail(token)
       .then(() => {
-        setEmailVerifyBanner({ type: "success", text: "Your email is verified." });
+        setEmailVerifyBanner({ type: "success", text: "Your email is verified. If you had ClosetSwap open in another tab, it's picked this up too — you can close this one." });
+        // Same-origin localStorage write, so a "storage" event fires in any other
+        // open tab (e.g. the one still on the signup screen) right away instead of
+        // it having to wait on its own poll - see the listener in Auth.js.
         try { localStorage.setItem("emailVerified", "true"); } catch { /* private mode, etc */ }
         setUser((u) => (u ? { ...u, emailVerified: true } : u));
+        // Only succeeds for a tab this page itself opened via script, which a
+        // link click from an email client never is - harmless no-op otherwise,
+        // the banner above covers that case.
+        setTimeout(() => { try { window.close(); } catch { /* not script-opened */ } }, 2500);
       })
       .catch((error) => {
         setEmailVerifyBanner({ type: "error", text: error.response?.data?.message || "That verification link is invalid or has expired." });
@@ -426,7 +433,7 @@ export default function ClosetSwap() {
   };
 
   const garmentOptions = useMemo(() => (
-    [...new Set(products.filter((p) => p.aud === aud).map((p) => p.garment).filter(Boolean))].sort()
+    [...new Set(products.filter((p) => aud === "all" || p.aud === aud).map((p) => p.garment).filter(Boolean))].sort()
   ), [products, aud]);
 
   // How many pieces (in the current audience tab) each area has listed,
@@ -435,7 +442,7 @@ export default function ClosetSwap() {
   const areaCounts = useMemo(() => {
     const counts = {};
     for (const p of products) {
-      if (p.aud === aud && p.area) counts[p.area] = (counts[p.area] || 0) + 1;
+      if ((aud === "all" || p.aud === aud) && p.area) counts[p.area] = (counts[p.area] || 0) + 1;
     }
     return counts;
   }, [products, aud]);
@@ -446,7 +453,7 @@ export default function ClosetSwap() {
   // before this feature existed, rather than being filtered out.
   const results = useMemo(() => products
     .filter((p) =>
-      p.aud === aud &&
+      (aud === "all" || p.aud === aud) &&
       (!garment || p.garment === garment) &&
       (!savedOnly || liked.includes(p.id))
     )

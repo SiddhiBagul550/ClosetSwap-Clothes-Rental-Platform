@@ -57,6 +57,7 @@ export function toListing(p) {
     mrp: null,
     days: 1,
     extraDay: rent, // flat per-day pricing: every extra day costs the same as the first
+    minDays: Math.max(1, Number(p.min_days) || 1),
     deposit: 0,
     sizes: p.size ? [p.size] : [],
     units: Math.max(1, Number(p.available_quantity) || 1),

@@ -88,7 +88,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
   }
 
   const units = Number(product.available_quantity) || 1;
-  const minDays = units === 1 ? 3 : 2;
+  const minDays = Number(product.min_days) || 1;
   const nights = Math.round((to - from) / DAY_MS);
   if (nights < minDays) return next(new AppError(`This lender's minimum is ${minDays} days`, 400));
 
@@ -104,9 +104,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
   const existing = await activeBookingsFor(productId);
   let overlapCount = 0;
   existing.forEach((b) => {
-    let effectiveEnd = startOfDay(b.toDate);
-    if (units === 1) effectiveEnd = addDays(effectiveEnd, 1); // cleaning turnaround day
-    if (rangesOverlap(from, to, startOfDay(b.fromDate), effectiveEnd)) overlapCount++;
+    if (rangesOverlap(from, to, startOfDay(b.fromDate), startOfDay(b.toDate))) overlapCount++;
   });
   if (overlapCount >= units) {
     return next(new AppError("Those dates aren't available for this piece", 409));

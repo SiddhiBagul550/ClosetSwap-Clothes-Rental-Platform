@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as api from "../api";
 import { T, label } from "../theme";
 import { normalizeContactNumber } from "../utils/listingHelpers";
@@ -9,14 +9,31 @@ import LegalModal from "./LegalModal";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* Wired to the real backend. Email + password is the login identifier; a
-   verification link is emailed on signup but nothing is gated on it yet.
+const IconInput = ({ icon, style, ...rest }) => (
+  <div style={{ position: "relative" }}>
+    <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: T.ink3, display: "flex" }}>
+      {icon}
+    </span>
+    <input {...rest} style={style} />
+  </div>
+);
+
+/* Wired to the real backend. Email + password is the login identifier.
    Contact number is collected at signup too - it's shown publicly on shop
-   listings, not used for login or verified. Forgot-password now goes to
-   email as well (see api.forgotPassword).
-   onDone(user) is called with the signed-in user on success. */
+   listings, not used for login or verified. Forgot-password goes to email
+   as well (see api.forgotPassword).
+   Signup is two-step: api.signup() creates the account and emails a
+   verification link, but we hold off calling onDone (and so hold off
+   dropping the user into the app) until that link has been used - the
+   "verifyEmail" stage polls for it and also lets them check manually or
+   resend. onDone(user) is called with the signed-in user once verified
+   (or immediately, for login). */
 export default function Auth({ mode, setMode, theme, onDone, initialAccountType }) {
-  const [stage, setStage] = useState("form"); // form | forgotRequest | forgotReset
+  const [stage, setStage] = useState("form"); // form | verifyEmail | forgotRequest | forgotReset
+  const [pendingUser, setPendingUser] = useState(null);
+  const [checking, setChecking] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
   const [accountType, setAccountType] = useState(initialAccountType || "individual");
   const [pw, setPw] = useState(""); const [pwConfirm, setPwConfirm] = useState("");
   const [name, setName] = useState("");
@@ -41,15 +58,6 @@ export default function Auth({ mode, setMode, theme, onDone, initialAccountType 
     width: "100%", fontFamily: "Karla, sans-serif", fontSize: 15, padding: "12px 13px 12px 37px",
     border: `1px solid ${bad ? T.err : T.line}`, borderRadius: 3, background: T.paper, color: T.ink,
   });
-
-  const IconInput = ({ icon, style, ...rest }) => (
-    <div style={{ position: "relative" }}>
-      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: T.ink3, display: "flex" }}>
-        {icon}
-      </span>
-      <input {...rest} style={style} />
-    </div>
-  );
 
   const submit = async () => {
     const e = {};
@@ -87,11 +95,70 @@ export default function Auth({ mode, setMode, theme, onDone, initialAccountType 
             agreedToTerms,
           })
         : await api.login(cleanEmail, pw);
-      onDone(user);
+      if (isSignup && !user.emailVerified) {
+        setPendingUser(user);
+        setStage("verifyEmail");
+      } else {
+        onDone(user);
+      }
     } catch (error) {
       setErr({ form: error.message });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkVerified = async (manual) => {
+    if (!pendingUser) return;
+    if (manual) { setChecking(true); setErr({}); }
+    try {
+      const fresh = await api.fetchUser(pendingUser.id);
+      if (fresh.emailVerified) {
+        try { localStorage.setItem("emailVerified", "true"); } catch { /* private mode, etc */ }
+        onDone({ ...pendingUser, emailVerified: true });
+        return;
+      }
+      if (manual) setErr({ form: "Still not verified — check your inbox (and spam folder), then try again." });
+    } catch (error) {
+      if (manual) setErr({ form: error.message || "Couldn't check verification status, please try again." });
+    } finally {
+      if (manual) setChecking(false);
+    }
+  };
+
+  useEffect(() => {
+    if (stage !== "verifyEmail" || !pendingUser) return undefined;
+    const id = setInterval(() => { checkVerified(false); }, 4000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, pendingUser]);
+
+  // If the verification link gets opened in a different tab (the usual case
+  // for a real email client, which decides for itself whether to reuse this
+  // tab or open a new one - not something we can control), that tab writes
+  // emailVerified=true to localStorage. The "storage" event only fires in
+  // *other* same-origin tabs, so this picks it up here immediately instead
+  // of waiting on the poll above.
+  useEffect(() => {
+    if (stage !== "verifyEmail" || !pendingUser) return undefined;
+    const onStorage = (e) => {
+      if (e.key === "emailVerified" && e.newValue === "true") checkVerified(false);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, pendingUser]);
+
+  const resendVerification = async () => {
+    setResending(true);
+    setResendMsg("");
+    try {
+      await api.resendVerificationEmail();
+      setResendMsg("Verification email sent — check your inbox.");
+    } catch (error) {
+      setResendMsg(error.message);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -233,6 +300,37 @@ export default function Auth({ mode, setMode, theme, onDone, initialAccountType 
                 <span onClick={() => switchMode(isSignup ? "login" : "signup")}
                   style={{ color: theme.deep, cursor: "pointer", borderBottom: `1px solid ${theme.accent}` }}>
                   {isSignup ? "Log in" : "Create an account"}
+                </span>
+              </p>
+            </>
+          )}
+
+          {stage === "verifyEmail" && (
+            <>
+              <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 300, fontSize: 30, letterSpacing: "-.02em", margin: "0 0 6px" }}>Check your email</h1>
+              <p style={{ fontSize: 14, color: T.ink2, margin: "0 0 26px" }}>
+                We've sent a verification link to <strong style={{ color: T.ink }}>{pendingUser?.email || email}</strong>. Open it to activate your account — we'll pick it up automatically once you do.
+              </p>
+
+              {resendMsg && <p style={{ fontSize: 12.5, color: theme.deep, background: theme.tint, borderRadius: 3, padding: "8px 10px", margin: "0 0 16px" }}>{resendMsg}</p>}
+              {err.form && <p style={{ fontSize: 13, color: T.err, margin: "-6px 0 16px" }}>{err.form}</p>}
+
+              <button onClick={() => checkVerified(true)} disabled={checking}
+                style={{ width: "100%", fontFamily: "Karla, sans-serif", fontSize: 15, fontWeight: 500, padding: "14px", border: "none", borderRadius: 3, background: T.ink, color: T.paper, cursor: checking ? "default" : "pointer", opacity: checking ? 0.7 : 1, marginTop: 4 }}>
+                {checking ? "Checking…" : "I've verified — continue"}
+              </button>
+
+              <p style={{ fontSize: 13, color: T.ink2, textAlign: "center", margin: "24px 0 0" }}>
+                Didn't get it?{" "}
+                <span onClick={resending ? undefined : resendVerification}
+                  style={{ color: theme.deep, cursor: resending ? "default" : "pointer", borderBottom: `1px solid ${theme.accent}` }}>
+                  {resending ? "Sending…" : "Resend email"}
+                </span>
+              </p>
+
+              <p style={{ fontSize: 13, color: T.ink2, textAlign: "center", margin: "10px 0 0" }}>
+                <span onClick={() => switchMode("login")} style={{ color: theme.deep, cursor: "pointer", borderBottom: `1px solid ${theme.accent}` }}>
+                  Back to log in
                 </span>
               </p>
             </>
