@@ -1,5 +1,4 @@
 const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
 const User = require("./../models/userModel");
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
@@ -22,26 +21,6 @@ exports.getUser = catchAsync(async (req, res, next) => {
     data: {
       user,
     },
-  });
-});
-
-// Admin-only: mark a shop account's GSTIN as verified. No admin UI yet - call this route directly.
-exports.verifyShop = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-
-  if (!user) {
-    return next(new AppError("No user found with that id", 404));
-  }
-  if (user.accountType !== "shop") {
-    return next(new AppError("Only shop accounts can be verified", 400));
-  }
-
-  user.verificationStatus = "verified";
-  await user.save({ validateBeforeSave: false });
-
-  res.status(200).json({
-    status: "success",
-    data: { user },
   });
 });
 

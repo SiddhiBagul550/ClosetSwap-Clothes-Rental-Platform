@@ -31,10 +31,20 @@ export default function Card({ p, theme, liked, toggle, open }) {
           </>
         )}
 
-        {p.occ && (
-          <span style={{ position: "absolute", top: 12, left: 12, ...label, background: "rgba(255,255,255,.92)", padding: "5px 9px", borderRadius: 2, color: T.ink2 }}>
-            {p.occ}
-          </span>
+        {((p.lender.type === "shop" && p.lender.verificationStatus === "verified") || p.occ) && (
+          <div style={{ position: "absolute", top: 12, left: 12, display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
+            {p.lender.type === "shop" && p.lender.verificationStatus === "verified" && (
+              <span style={{ display: "flex", alignItems: "center", gap: 4, ...label, background: "rgba(255,255,255,.92)", padding: "5px 9px 5px 6px", borderRadius: 2, color: T.ok }}>
+                <Tick c={T.ok} s={12} />
+                Verified shop
+              </span>
+            )}
+            {p.occ && (
+              <span style={{ ...label, background: "rgba(255,255,255,.92)", padding: "5px 9px", borderRadius: 2, color: T.ink2 }}>
+                {p.occ}
+              </span>
+            )}
+          </div>
         )}
 
         <button onClick={(e) => { e.stopPropagation(); toggle(p.id); }}

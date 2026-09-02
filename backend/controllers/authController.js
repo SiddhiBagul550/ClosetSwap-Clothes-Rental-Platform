@@ -24,8 +24,7 @@ const createSendToken = (user, statusCode, res) => {
 
   res.cookie("jwt", token, cookieOptions);
 
-  user.password = undefined;
-  user.isAdmin = undefined; // select:false only hides these on queries, not on a freshly created/saved doc
+  user.password = undefined; // select:false only hides these on queries, not on a freshly created/saved doc
   user.emailVerificationToken = undefined;
   user.emailVerificationExpires = undefined;
   user.emailVerificationSentAt = undefined;
@@ -242,13 +241,14 @@ exports.requireEmailVerified = (req, res, next) => {
   next();
 };
 
-exports.restrictToAdmin = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select("+isAdmin");
-  if (!user || !user.isAdmin) {
+// req.user is the full document `protect` already fetched, and accountType
+// isn't select:false, so the role check needs no extra database round trip.
+exports.restrictToAdmin = (req, res, next) => {
+  if (req.user.accountType !== "admin") {
     return next(new AppError("You do not have permission to perform this action", 403));
   }
   next();
-});
+};
 
 exports.verfiyCheck = catchAsync(async (req, res) => {
   const token = req.cookies.jwt;

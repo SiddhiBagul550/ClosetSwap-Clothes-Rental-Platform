@@ -42,8 +42,5 @@ router.route("/:id").get(authController.protect, userController.getUser);
 router.route("/verify").get(authController.verfiyCheck);
 router.route("/like/:id").post(authController.protect, authController.requireEmailVerified, userController.Liked);
 router.route("/cart/:id").post(authController.protect, authController.requireEmailVerified, userController.cart);
-router
-  .route("/:id/verify-shop")
-  .patch(authController.protect, authController.restrictToAdmin, userController.verifyShop);
 
 module.exports = router;

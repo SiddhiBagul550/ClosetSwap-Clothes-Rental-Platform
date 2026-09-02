@@ -17,6 +17,8 @@ import MyBookings from "./components/MyBookings";
 import Requests from "./components/Requests";
 import Messages from "./components/Messages";
 import InfoModal from "./components/InfoModal";
+import AdminShops from "./components/AdminShops";
+import AdminOverview from "./components/AdminOverview";
 
 /* ============================================================
    Closet Swap — peer-to-peer + shop clothing rental marketplace
@@ -178,6 +180,17 @@ export default function ClosetSwap() {
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadsError, setThreadsError] = useState("");
   const [chatBooking, setChatBooking] = useState(null); // { bookingId, title, subtitle, closed } | null
+
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminTab, setAdminTab] = useState("overview"); // overview | shops
+  const [adminOverview, setAdminOverview] = useState(null);
+  const [adminOverviewLoading, setAdminOverviewLoading] = useState(false);
+  const [adminOverviewError, setAdminOverviewError] = useState("");
+  const [adminShops, setAdminShops] = useState([]);
+  const [adminShopsLoading, setAdminShopsLoading] = useState(false);
+  const [adminShopsError, setAdminShopsError] = useState("");
+  const [adminStatusFilter, setAdminStatusFilter] = useState("pending");
+  const [adminActingId, setAdminActingId] = useState(null);
 
   const theme = AUD[aud];
   const switchAud = (k) => { setAud(k); setGarment(null); };
@@ -383,6 +396,96 @@ export default function ClosetSwap() {
 
   const unreadMessageCount = threads.reduce((sum, t) => sum + t.unreadCount, 0);
 
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    api.checkAdmin().then(setIsAdmin);
+  }, [user]);
+
+  // Admins get a pure admin panel, not the marketplace - drop them straight
+  // into it as soon as we know they're an admin, and keep them there.
+  useEffect(() => {
+    if (isAdmin) setView("admin");
+  }, [isAdmin]);
+
+  const loadAdminOverview = useCallback(async () => {
+    setAdminOverviewLoading(true);
+    setAdminOverviewError("");
+    try {
+      setAdminOverview(await api.fetchAdminOverview());
+    } catch (error) {
+      setAdminOverviewError(error.message);
+    } finally {
+      setAdminOverviewLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view === "admin" && isAdmin && adminTab === "overview") loadAdminOverview();
+  }, [view, isAdmin, adminTab, loadAdminOverview]);
+
+  const loadAdminShops = useCallback(async () => {
+    setAdminShopsLoading(true);
+    setAdminShopsError("");
+    try {
+      setAdminShops(await api.fetchShopsForAdmin(adminStatusFilter));
+    } catch (error) {
+      setAdminShopsError("Couldn't load shops — is the backend running?");
+    } finally {
+      setAdminShopsLoading(false);
+    }
+  }, [adminStatusFilter]);
+
+  useEffect(() => {
+    if (view === "admin" && isAdmin && adminTab === "shops") loadAdminShops();
+  }, [view, isAdmin, adminTab, adminStatusFilter, loadAdminShops]);
+
+  const patchAdminShopLocally = (id, patch) => {
+    setAdminShops((list) => list.map((s) => (s._id === id ? { ...s, ...patch } : s)));
+  };
+
+  const verifyAdminShop = async (id) => {
+    setAdminActingId(id);
+    try {
+      const updated = await api.verifyShopAdmin(id);
+      if (adminStatusFilter === "all") patchAdminShopLocally(id, updated);
+      else setAdminShops((list) => list.filter((s) => s._id !== id));
+    } catch (error) {
+      setAdminShopsError(error.message);
+    } finally {
+      setAdminActingId(null);
+    }
+  };
+
+  const rejectAdminShop = async (id) => {
+    const reason = window.prompt("Reason for rejecting this shop (shown to the owner):");
+    if (reason === null) return;
+    if (!reason.trim()) { setAdminShopsError("A reason is required to reject a shop."); return; }
+    setAdminActingId(id);
+    try {
+      const updated = await api.rejectShopAdmin(id, reason.trim());
+      if (adminStatusFilter === "all") patchAdminShopLocally(id, updated);
+      else setAdminShops((list) => list.filter((s) => s._id !== id));
+    } catch (error) {
+      setAdminShopsError(error.message);
+    } finally {
+      setAdminActingId(null);
+    }
+  };
+
+  const revokeAdminShop = async (id) => {
+    if (!window.confirm("Send this shop back to pending review?")) return;
+    setAdminActingId(id);
+    try {
+      const updated = await api.revokeShopAdmin(id);
+      if (adminStatusFilter === "all") patchAdminShopLocally(id, updated);
+      else setAdminShops((list) => list.filter((s) => s._id !== id));
+    } catch (error) {
+      setAdminShopsError(error.message);
+    } finally {
+      setAdminActingId(null);
+    }
+  };
+
   const openChat = (booking, counterpartName, listingName) => {
     setChatBooking({
       bookingId: booking._id,
@@ -429,7 +532,11 @@ export default function ClosetSwap() {
     setReceivedBookings([]);
     setThreads([]);
     setChatBooking(null);
-    if (view === "mylistings" || view === "mybookings" || view === "requests" || view === "messages") setView("browse");
+    setIsAdmin(false);
+    setAdminTab("overview");
+    setAdminOverview(null);
+    setAdminShops([]);
+    if (view === "mylistings" || view === "mybookings" || view === "requests" || view === "messages" || view === "admin") setView("browse");
   };
 
   const garmentOptions = useMemo(() => (
@@ -527,7 +634,7 @@ export default function ClosetSwap() {
       {/* Header */}
       <header ref={headerRef} style={{ position: "sticky", top: 0, zIndex: 30, background: "rgba(251,250,248,.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.line}` }}>
         <div className="cs-header-inner" style={{ maxWidth: 1220, margin: "0 auto", padding: "14px 32px", minHeight: 70, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap", position: "relative" }}>
-          <button onClick={() => { setView("browse"); setMenuOpen(false); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+          <button onClick={() => { setView(isAdmin ? "admin" : "browse"); setMenuOpen(false); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
             <Wordmark accent={theme.accent} />
           </button>
 
@@ -544,7 +651,7 @@ export default function ClosetSwap() {
           </button>
 
           <div className={`cs-header-controls${menuOpen ? " cs-open" : ""}`}>
-            {view !== "auth" && (
+            {view !== "auth" && !isAdmin && (
               <div role="tablist" aria-label="Shop for" className="cs-tabs" style={{ display: "flex", gap: 2, border: `1px solid ${T.line}`, borderRadius: 999, padding: 3, background: T.card }}>
                 {Object.entries(AUD).map(([k, v]) => (
                   <button key={k} role="tab" aria-selected={aud === k} onClick={() => { switchAud(k); setView("browse"); setMenuOpen(false); }}
@@ -556,7 +663,7 @@ export default function ClosetSwap() {
               </div>
             )}
 
-            {view !== "auth" && (
+            {view !== "auth" && !isAdmin && (
               <div ref={whereRef} className="cs-where-wrap" style={{ position: "relative" }}>
                 <button onClick={() => { setWhereOpen((o) => !o); dismissWhereCoach(); }}
                   style={{ fontFamily: "Karla, sans-serif", fontSize: 13, color: T.ink2, background: T.card, border: `1px solid ${T.line}`, borderRadius: 999, padding: "8px 15px", cursor: "pointer" }}>
@@ -573,28 +680,38 @@ export default function ClosetSwap() {
             )}
 
             <nav className="cs-nav" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: T.ink2 }}>
-              <button onClick={() => { setView("lend"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "lend" ? T.ink : T.ink2, cursor: "pointer" }}>Lend yours</button>
-              <button onClick={() => { user ? setView("mylistings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mylistings" ? T.ink : T.ink2, cursor: "pointer" }}>My listings</button>
-              <button onClick={() => { user ? setView("requests") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "requests" ? T.ink : T.ink2, cursor: "pointer" }}>Requests</button>
-              <button onClick={() => { user ? setView("mybookings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mybookings" ? T.ink : T.ink2, cursor: "pointer" }}>My bookings</button>
-              <button onClick={() => { user ? setView("messages") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "messages" ? T.ink : T.ink2, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-                Messages
-                {unreadMessageCount > 0 && (
-                  <span style={{ minWidth: 16, height: 16, borderRadius: 999, background: T.err, color: T.paper, fontSize: 10, fontWeight: 700, display: "grid", placeItems: "center", padding: "0 4px" }}>
-                    {unreadMessageCount}
+              {!isAdmin && (
+                <>
+                  <button onClick={() => { setView("lend"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "lend" ? T.ink : T.ink2, cursor: "pointer" }}>Lend yours</button>
+                  <button onClick={() => { user ? setView("mylistings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mylistings" ? T.ink : T.ink2, cursor: "pointer" }}>My listings</button>
+                  <button onClick={() => { user ? setView("requests") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "requests" ? T.ink : T.ink2, cursor: "pointer" }}>Requests</button>
+                  <button onClick={() => { user ? setView("mybookings") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "mybookings" ? T.ink : T.ink2, cursor: "pointer" }}>My bookings</button>
+                  <button onClick={() => { user ? setView("messages") : goToAuth("login"); setMenuOpen(false); }} style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "messages" ? T.ink : T.ink2, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    Messages
+                    {unreadMessageCount > 0 && (
+                      <span style={{ minWidth: 16, height: 16, borderRadius: 999, background: T.err, color: T.paper, fontSize: 10, fontWeight: 700, display: "grid", placeItems: "center", padding: "0 4px" }}>
+                        {unreadMessageCount}
+                      </span>
+                    )}
+                  </button>
+                  <span onClick={() => { user ? setSavedOnly((s) => !s) : goToAuth("login"); setMenuOpen(false); }}
+                    style={{ cursor: "pointer", color: savedOnly ? theme.deep : T.ink2, fontWeight: savedOnly ? 600 : 400 }}>
+                    Saved {liked.length > 0 && <b style={{ color: theme.deep }}>({liked.length})</b>}
                   </span>
-                )}
-              </button>
-              <span onClick={() => { user ? setSavedOnly((s) => !s) : goToAuth("login"); setMenuOpen(false); }}
-                style={{ cursor: "pointer", color: savedOnly ? theme.deep : T.ink2, fontWeight: savedOnly ? 600 : 400 }}>
-                Saved {liked.length > 0 && <b style={{ color: theme.deep }}>({liked.length})</b>}
-              </span>
+                </>
+              )}
+              {isAdmin && (
+                <button onClick={() => { setView("admin"); setMenuOpen(false); }}
+                  style={{ background: "none", border: "none", fontFamily: "Karla, sans-serif", fontSize: 13, color: view === "admin" ? T.ink : T.ink2, cursor: "pointer" }}>
+                  Admin
+                </button>
+              )}
               {user ? (
                 <>
                   <span style={{ color: T.ink }}>Hi, {user.username?.split(" ")[0] || "there"}</span>
                   {user.accountType === "shop" && user.verificationStatus !== "verified" && (
-                    <span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase", color: T.ink3 }}>
-                      Shop pending verification
+                    <span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase", color: user.verificationStatus === "rejected" ? T.err : T.ink3 }}>
+                      {user.verificationStatus === "rejected" ? "Shop verification rejected" : "Shop pending verification"}
                     </span>
                   )}
                   {!user.emailVerified && (
@@ -639,13 +756,13 @@ export default function ClosetSwap() {
             if (bookingResume) setDetail(bookingResume.listing);
           }} />
       )}
-      {view === "lend" && (
+      {view === "lend" && !isAdmin && (
         user && !user.emailVerified ? <VerifyGate what="list an item" /> : (
           <Lend theme={theme} user={user} onNeedLogin={() => goToAuth("login")} onListed={() => { loadProducts(); loadMyListings(); setView("browse"); }} />
         )
       )}
 
-      {view === "mylistings" && (
+      {view === "mylistings" && !isAdmin && (
         !user ? (
           <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
             <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your listings</p>
@@ -662,7 +779,7 @@ export default function ClosetSwap() {
         )
       )}
 
-      {view === "mybookings" && (
+      {view === "mybookings" && !isAdmin && (
         !user ? (
           <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
             <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your bookings</p>
@@ -677,7 +794,7 @@ export default function ClosetSwap() {
         )
       )}
 
-      {view === "requests" && (
+      {view === "requests" && !isAdmin && (
         !user ? (
           <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
             <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your requests</p>
@@ -693,7 +810,7 @@ export default function ClosetSwap() {
         )
       )}
 
-      {view === "messages" && (
+      {view === "messages" && !isAdmin && (
         !user ? (
           <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
             <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: "0 0 18px" }}>Log in to see your messages</p>
@@ -707,7 +824,35 @@ export default function ClosetSwap() {
         )
       )}
 
-      {view === "browse" && (
+      {view === "admin" && (
+        !isAdmin ? (
+          <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "88px 32px", textAlign: "center" }}>
+            <p style={{ fontFamily: "Fraunces, serif", fontSize: 22, margin: 0 }}>You don't have access to this section.</p>
+          </div>
+        ) : (
+          <>
+            <div className="cs-container" style={{ maxWidth: 980, margin: "0 auto", padding: "40px 32px 0", display: "flex", gap: 8 }}>
+              {[["overview", "Overview"], ["shops", "Shop verification"]].map(([k, t]) => (
+                <button key={k} onClick={() => setAdminTab(k)}
+                  style={{ fontFamily: "Karla, sans-serif", fontSize: 13, padding: "8px 15px", borderRadius: 999, cursor: "pointer",
+                    border: `1px solid ${adminTab === k ? T.ink : T.line}`, background: adminTab === k ? T.ink : "transparent",
+                    color: adminTab === k ? T.paper : T.ink2, fontWeight: adminTab === k ? 600 : 400 }}>
+                  {t}
+                </button>
+              ))}
+            </div>
+            {adminTab === "overview" ? (
+              <AdminOverview data={adminOverview} loading={adminOverviewLoading} error={adminOverviewError} onRetry={loadAdminOverview} />
+            ) : (
+              <AdminShops items={adminShops} loading={adminShopsLoading} error={adminShopsError} onRetry={loadAdminShops}
+                statusFilter={adminStatusFilter} onFilterChange={setAdminStatusFilter}
+                onVerify={verifyAdminShop} onReject={rejectAdminShop} onRevoke={revokeAdminShop} actingId={adminActingId} />
+            )}
+          </>
+        )
+      )}
+
+      {view === "browse" && !isAdmin && (
         <>
           {/* Hero */}
           <section className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "56px 32px 34px" }}>
@@ -844,6 +989,7 @@ export default function ClosetSwap() {
         </>
       )}
 
+      {!isAdmin && (
       <footer style={{ borderTop: `1px solid ${T.line}` }}>
         <div className="cs-container" style={{ maxWidth: 1220, margin: "0 auto", padding: "36px 32px", display: "flex", flexWrap: "wrap", gap: 18, justifyContent: "space-between", alignItems: "center" }}>
           <Wordmark size={17} accent={theme.accent} />
@@ -859,6 +1005,7 @@ export default function ClosetSwap() {
           <span style={{ fontSize: 12, color: T.ink3 }}>Pune · {AREAS.length} areas live</span>
         </div>
       </footer>
+      )}
 
       {footerInfo && footerInfo === "areas" && (
         <InfoModal title="Areas we cover"

@@ -4,9 +4,14 @@ const bcrept = require("bcryptjs");
 const crypto = require("crypto");
 
 const userSchema = mongoose.Schema({
+  // "admin" is a distinct, non-self-serve role: it's never selectable at
+  // signup (see authController.signup) and only ever set directly in the
+  // database. Admin accounts don't rent, lend, or get verified - they exist
+  // purely to run the admin panel, so they're excluded from the shop and
+  // individual counts/listings everywhere in adminController.
   accountType: {
     type: String,
-    enum: { values: ["individual", "shop"], message: "Account type must be individual or shop" },
+    enum: { values: ["individual", "shop", "admin"], message: "Account type must be individual, shop, or admin" },
     required: [true, "Please tell us if this is an individual or shop account"],
     default: "individual",
   },
@@ -112,16 +117,16 @@ const userSchema = mongoose.Schema({
   // Individuals have nothing to verify; shop accounts start pending until an admin confirms the GSTIN.
   verificationStatus: {
     type: String,
-    enum: ["pending", "verified"],
+    enum: ["pending", "verified", "rejected"],
     default: function () {
       return this.accountType === "shop" ? "pending" : "verified";
     },
   },
 
-  isAdmin: {
-    type: Boolean,
-    default: false,
-    select: false,
+  // Shop-only: set by an admin when rejecting a verification request, cleared on approval.
+  rejectionReason: {
+    type: String,
+    trim: true,
   },
 
   agreedToTermsAt: {
@@ -140,7 +145,7 @@ const userSchema = mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: { type: String, select: false },
   passwordResetExpires: { type: Date, select: false },
-});
+}, { timestamps: true });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

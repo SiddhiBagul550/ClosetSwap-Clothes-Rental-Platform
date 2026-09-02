@@ -217,4 +217,57 @@ export async function sendMessage(bookingId, text) {
   }
 }
 
+/* Whether the logged-in user is an admin. isAdmin is deliberately stripped
+   from the login/signup payload (see backend authController), so this is a
+   dedicated round trip rather than something read off the stored session. */
+export async function checkAdmin() {
+  try {
+    const { data } = await api.get("/admin/check");
+    return !!data.data.isAdmin;
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchAdminOverview() {
+  try {
+    const { data } = await api.get("/admin/overview");
+    return data.data; // { totals: { shops, individuals, items }, shops: [...], individuals: [...] }
+  } catch (error) {
+    throw new Error(errMessage(error, "Couldn't load the admin overview, please try again."));
+  }
+}
+
+export async function fetchShopsForAdmin(status) {
+  const { data } = await api.get("/admin/shops", { params: status && status !== "all" ? { status } : {} });
+  return data.data.shops;
+}
+
+export async function verifyShopAdmin(id) {
+  try {
+    const { data } = await api.patch(`/admin/shops/${id}/verify`);
+    return data.data.user;
+  } catch (error) {
+    throw new Error(errMessage(error, "Couldn't verify that shop, please try again."));
+  }
+}
+
+export async function rejectShopAdmin(id, reason) {
+  try {
+    const { data } = await api.patch(`/admin/shops/${id}/reject`, { reason });
+    return data.data.user;
+  } catch (error) {
+    throw new Error(errMessage(error, "Couldn't reject that shop, please try again."));
+  }
+}
+
+export async function revokeShopAdmin(id) {
+  try {
+    const { data } = await api.patch(`/admin/shops/${id}/revoke`);
+    return data.data.user;
+  } catch (error) {
+    throw new Error(errMessage(error, "Couldn't update that shop, please try again."));
+  }
+}
+
 export default api;

@@ -69,7 +69,7 @@ export function toListing(p) {
     active: p.isActive !== false,
     unavailableDates: (p.unavailableDates || []).map((r) => ({ from: r.from, to: r.to })),
     lender: p.ownerInfo && p.ownerInfo.accountType === "shop"
-      ? { type: "shop", name: p.ownerInfo.username, rating: null, rentals: null, since: null, address: p.ownerInfo.address || null }
+      ? { type: "shop", name: p.ownerInfo.username, rating: null, rentals: null, since: null, address: p.ownerInfo.address || null, verificationStatus: p.ownerInfo.verificationStatus }
       : { type: "person", rating: null, rentals: null, since: null },
   };
 }

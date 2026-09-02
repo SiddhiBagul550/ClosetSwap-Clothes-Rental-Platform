@@ -6,6 +6,7 @@ const cors = require("cors");
 const productRoutes = require("./routes/productRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/messages", messageRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.all("*", (req, res, next) => {
   // res.status(404).json({
