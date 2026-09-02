@@ -6,12 +6,12 @@ const authController = require("../controllers/authController");
 router
   .route("/")
   .get(productsController.getAllProducts)
-  .post(authController.protect, productsController.createProduct);
+  .post(authController.protect, authController.requireEmailVerified, productsController.createProduct);
 
 router
   .route("/:id")
   .get(productsController.getProductsById)
-  .delete(authController.protect, productsController.deleteProduct)
-  .patch(authController.protect, productsController.updateProduct);
+  .delete(authController.protect, authController.requireEmailVerified, productsController.deleteProduct)
+  .patch(authController.protect, authController.requireEmailVerified, productsController.updateProduct);
 
 module.exports = router;

@@ -21,6 +21,8 @@ const COURIER = 120;
 
 const label = { fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: T.ink3, fontWeight: 500 };
 const inr = (n) => "₹" + n.toLocaleString("en-IN");
+const mapsUrlForQuery = (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const mapsUrl = (area) => mapsUrlForQuery(`${area}, Pune, India`);
 
 /* Local calendar-day key, deliberately not UTC-based (toISOString would shift
    the date whenever the browser's timezone isn't UTC). Used both for the
@@ -33,18 +35,27 @@ const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 const fmt = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 const nights = (a, b) => Math.round((b - a) / 86400000);
 
-/* Turns the active (requested/accepted) bookings from GET
-   /bookings/availability/:productId into a day -> occupied-units map. A
-   single-unit piece's cleaning-turnaround day isn't stored explicitly — it
-   falls out of dayState() below noticing the previous day was occupied. */
-function bookedMapFromBookings(bookings) {
+/* Turns GET /bookings/availability/:productId into a day -> occupied-units
+   map. A single-unit piece's cleaning-turnaround day isn't stored explicitly
+   — it falls out of dayState() below noticing the previous day was occupied.
+   The owner's own blackout ranges (blockedDates) are folded in here too,
+   marked as occupying every unit since they're a hard block regardless of
+   how many identical units exist. */
+function bookedMapFromAvailability(data, units) {
   const map = {};
-  (bookings || []).forEach((b) => {
+  (data?.bookings || []).forEach((b) => {
     const start = toLocalDate(b.fromDate);
     const end = toLocalDate(b.toDate);
     for (let d = new Date(start); d < end; d = addDays(d, 1)) {
       const key = iso(d);
       map[key] = (map[key] || 0) + 1;
+    }
+  });
+  (data?.blockedDates || []).forEach((r) => {
+    const start = toLocalDate(r.fromDate);
+    const end = toLocalDate(r.toDate);
+    for (let d = new Date(start); d <= end; d = addDays(d, 1)) {
+      map[iso(d)] = units;
     }
   });
   return map;
@@ -136,26 +147,27 @@ function Month({ year, month, booked, units, from, to, onPick, minStart, theme }
 }
 
 /* ---------------- Flow ---------------- */
-export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose }) {
-  const [step, setStep] = useState(1);
-  const [from, setFrom] = useState(null);
-  const [to, setTo] = useState(null);
-  const [handoff, setHandoff] = useState(null);
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [size, setSize] = useState(null);
+export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose, resume }) {
+  const [step, setStep] = useState(resume ? 3 : 1);
+  const [from, setFrom] = useState(resume?.from ?? null);
+  const [to, setTo] = useState(resume?.to ?? null);
+  const [handoff, setHandoff] = useState(resume?.handoff ?? null);
+  const [deliveryAddress, setDeliveryAddress] = useState(resume?.deliveryAddress ?? "");
+  const [size, setSize] = useState(resume?.size ?? null);
   const [err, setErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [availability, setAvailability] = useState(null); // { units, bookings } | null while loading
   const [availabilityError, setAvailabilityError] = useState("");
 
   const isShop = listing.lender.type === "shop";
+  const isOwnListing = !!user && listing.owner === user.id;
   const units = availability?.units ?? listing.units;
   const baseDays = listing.baseDays ?? listing.days;
   const minDays = listing.minDays ?? (units === 1 ? 3 : 2);
   const extraDay = listing.extraDay ?? Math.round((listing.rent / baseDays) * 0.3 / 10) * 10;
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
-  const booked = useMemo(() => bookedMapFromBookings(availability?.bookings), [availability]);
+  const booked = useMemo(() => bookedMapFromAvailability(availability, units), [availability, units]);
   const minStart = addDays(today, leadDays(handoff || (listing.handoff.includes("Courier") ? "Courier" : "Collect")));
 
   useEffect(() => {
@@ -208,7 +220,8 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
       setErr(""); setStep(3); return;
     }
     if (step === 3) {
-      if (!user) { onNeedLogin(); return; }
+      if (!user) { onNeedLogin({ from, to, size, handoff, deliveryAddress }); return; }
+      if (isOwnListing) return;
       setErr("");
       setSubmitting(true);
       try {
@@ -414,6 +427,9 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
                       <p style={{ fontSize: 13, color: T.ink2, margin: 0, lineHeight: 1.6 }}>
                         The lender has 12 hours to accept. Your card is held, not charged. If they decline or run out of time, the hold drops off and we'll show you three similar pieces nearby.
                       </p>
+                      <p style={{ fontSize: 13, color: T.ink2, margin: "10px 0 0", lineHeight: 1.6 }}>
+                        No need to rush anything outside the app — take your time getting to know a lender first.
+                      </p>
                     </div>
                   )}
 
@@ -459,8 +475,14 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
               {step < 4 && (
                 <div className="csbk-actions" style={{ display: "flex", gap: 10, marginTop: 30, borderTop: `1px solid ${T.line}`, paddingTop: 24 }}>
                   {step > 1 && <button onClick={() => { setStep(step - 1); setErr(""); }} style={btn(false)}>Back</button>}
-                  <button onClick={next} disabled={submitting} style={{ ...btn(true), opacity: submitting ? 0.7 : 1, cursor: submitting ? "default" : "pointer" }}>
-                    {step === 3 ? (submitting ? "Sending…" : "Send request") : "Continue"}
+                  <button onClick={next} disabled={submitting || (step === 3 && isOwnListing)}
+                    title={step === 3 && isOwnListing ? "You can't book your own listing" : undefined}
+                    style={{
+                      ...btn(true),
+                      opacity: submitting ? 0.7 : (step === 3 && isOwnListing) ? 0.5 : 1,
+                      cursor: submitting ? "default" : (step === 3 && isOwnListing) ? "not-allowed" : "pointer",
+                    }}>
+                    {step === 3 ? (isOwnListing ? "You can't book your own listing" : submitting ? "Sending…" : "Send request") : "Continue"}
                   </button>
                 </div>
               )}
@@ -484,6 +506,32 @@ export default function BookingFlow({ listing, theme, user, onNeedLogin, onClose
                 <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 400, fontSize: 19, lineHeight: 1.25, margin: "0 0 16px" }}>{listing.name}</h2>
                 {listing.description && (
                   <p style={{ fontSize: 13, color: T.ink2, lineHeight: 1.6, margin: "-8px 0 16px" }}>{listing.description}</p>
+                )}
+
+                {isShop && listing.lender.address ? (
+                  // Shops are public businesses, so the full pickup address shows as soon as
+                  // the listing is opened. Individual lenders stay area-only here — their
+                  // exact address only appears once they've accepted a booking (My bookings).
+                  <div style={{ margin: "-8px 0 16px" }}>
+                    <p style={{ fontSize: 13, color: T.ink2, margin: "0 0 6px", lineHeight: 1.5 }}>{listing.lender.address}</p>
+                    <a href={mapsUrlForQuery(listing.lender.address)} target="_blank" rel="noopener noreferrer" title="See on Google Maps"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: theme.deep, textDecoration: "none" }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style={{ flexShrink: 0 }}>
+                        <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+                      </svg>
+                      <span style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>See on Maps</span>
+                    </a>
+                  </div>
+                ) : listing.area && (
+                  <a href={mapsUrl(listing.area)} target="_blank" rel="noopener noreferrer" title={`Open ${listing.area} in Google Maps`}
+                    style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: theme.deep, textDecoration: "none", margin: "-8px 0 16px" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+                    </svg>
+                    <span style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
+                      {listing.area}, Pune{listing.hasLocation ? ` · ${listing.km} km from you` : ""}
+                    </span>
+                  </a>
                 )}
 
                 {from && to ? (

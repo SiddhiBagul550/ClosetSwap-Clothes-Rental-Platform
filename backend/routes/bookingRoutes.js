@@ -5,7 +5,7 @@ const bookingController = require("../controllers/bookingController");
 
 router.get("/availability/:productId", bookingController.getAvailability);
 
-router.use(authController.protect);
+router.use(authController.protect, authController.requireEmailVerified);
 
 router.route("/").post(bookingController.createBooking);
 router.get("/mine", bookingController.getMyBookings);

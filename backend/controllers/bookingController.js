@@ -28,6 +28,14 @@ function activeBookingsFor(productId) {
   return Booking.find({ product: productId, status: { $in: ACTIVE_STATUSES } });
 }
 
+// Owner-declared blackout ranges block every unit, unlike bookings which
+// only take up as many units as they reserve.
+function overlapsOwnerBlock(product, from, to) {
+  return (product.unavailableDates || []).some((range) =>
+    rangesOverlap(from, to, startOfDay(range.from), addDays(startOfDay(range.to), 1))
+  );
+}
+
 /* Booking.product/renter/owner are plain id strings (matching the rest of
    this codebase's convention, e.g. productModel.owner) rather than populated
    refs, so listing/user details are attached by hand here. */
@@ -55,6 +63,7 @@ exports.getAvailability = catchAsync(async (req, res, next) => {
     data: {
       units: Number(product.available_quantity) || 1,
       bookings: bookings.map((b) => ({ fromDate: b.fromDate, toDate: b.toDate, status: b.status })),
+      blockedDates: (product.unavailableDates || []).map((r) => ({ fromDate: r.from, toDate: r.to })),
     },
   });
 });
@@ -64,6 +73,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
 
   const product = await Product.findById(productId);
   if (!product) return next(new AppError("No product found with that id", 404));
+  if (!product.isActive) return next(new AppError("This listing isn't available for booking right now", 400));
   if (product.owner === req.user.id) return next(new AppError("You can't book your own listing", 400));
 
   if (!fromDate || !toDate) return next(new AppError("Pick a pick-up and a return day", 400));
@@ -86,6 +96,10 @@ exports.createBooking = catchAsync(async (req, res, next) => {
   const leadDays = handoff === "Courier" ? 2 : 1;
   const minStart = addDays(today, leadDays);
   if (from < minStart) return next(new AppError("That pick-up date is too soon for this handover method", 400));
+
+  if (overlapsOwnerBlock(product, from, to)) {
+    return next(new AppError("The owner has marked those dates unavailable", 409));
+  }
 
   const existing = await activeBookingsFor(productId);
   let overlapCount = 0;
@@ -126,7 +140,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
 exports.getMyBookings = catchAsync(async (req, res) => {
   const raw = await Booking.find({ renter: req.user.id }).sort("-createdAt");
   const withListings = await attachListings(raw);
-  const bookings = await attachUsers(withListings, "owner", "username contactNumber address");
+  const bookings = await attachUsers(withListings, "owner", "username contactNumber address accountType verificationStatus");
   res.status(200).json({ status: "success", results: bookings.length, data: { bookings } });
 });
 
